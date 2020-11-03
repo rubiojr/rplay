@@ -59,13 +59,18 @@ func playSong(c *cli.Context) error {
 		os.Exit(1)
 	}
 
+	meta := map[string]string{}
 	var fname string
 	err = match.VisitStoredFields(func(field string, value []byte) bool {
 		if field == "blobs" {
 			blobBytes, err = fetchBlobs(repo, value)
+			return true
 		}
 		if field == "filename" {
 			fname = string(value)
+		}
+		if field != "repository_id" && field != "repository_location" && field != "_id" {
+			meta[field] = string(value)
 		}
 		return true
 	})
@@ -76,6 +81,9 @@ func playSong(c *cli.Context) error {
 		return fmt.Errorf("MP3 '%s' not found in the repository.", fname)
 	}
 
+	for k, v := range meta {
+		printRow(k, v, headerColor)
+	}
 	play(blobBytes)
 	return nil
 }

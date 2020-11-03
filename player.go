@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 
 	"github.com/hajimehoshi/oto"
@@ -26,8 +25,6 @@ func play(b []byte) error {
 
 	p := c.NewPlayer()
 	defer p.Close()
-
-	fmt.Printf("Length: %d[bytes]\n", d.Length())
 
 	if _, err := io.Copy(p, d); err != nil {
 		return err
