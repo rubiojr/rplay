@@ -289,8 +289,6 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/restic/chunker v0.4.0 h1:YUPYCUn70MYP7VO4yllypp2SjmsRhRJaad3xKu1QFRw=
 github.com/restic/chunker v0.4.0/go.mod h1:z0cH2BejpW636LXw0R/BGyv+Ey8+m9QGiOanDHItzyw=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
-github.com/rubiojr/rapi v0.0.0-20201029202201-b7e24b4d8d66 h1:zEJEJKKoCk1vzwf8iHsTbElafAKVaB2crPli9BrDHPo=
-github.com/rubiojr/rapi v0.0.0-20201029202201-b7e24b4d8d66/go.mod h1:VvytxbNZgrJmrMN1hb1PgKBSN1G34zAXegwG/NftKsk=
 github.com/rubiojr/rapi v0.0.0-20201103114939-fefe2fcf8192 h1:83DUhF1FMFDPi0pDzZ0kd+/W2dhR+o7AMlQoTMJuX7A=
 github.com/rubiojr/rapi v0.0.0-20201103114939-fefe2fcf8192/go.mod h1:VvytxbNZgrJmrMN1hb1PgKBSN1G34zAXegwG/NftKsk=
 github.com/russross/blackfriday v1.5.2 h1:HyvC0ARfnZBqnXwABFeSZHpKvJHJJfPz81GNueLj0oo=
