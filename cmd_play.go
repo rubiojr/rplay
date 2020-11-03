@@ -18,8 +18,8 @@ import (
 func init() {
 	cmd := &cli.Command{
 		Name:   "play",
-		Usage:  "Play a given song",
-		Action: playSong,
+		Usage:  "Play a song (random if no argument given)",
+		Action: playCmd,
 	}
 	appCommands = append(appCommands, cmd)
 }
@@ -52,16 +52,32 @@ func randomize() string {
 	return found
 }
 
-func playSong(c *cli.Context) error {
+func playCmd(c *cli.Context) error {
 	repo, err := rapi.OpenRepository(globalOptions)
 	if err != nil {
 		return err
 	}
+
 	id := c.Args().Get(0)
 	if id == "" {
-		id = randomize()
+		fmt.Println("Playing a random selection of songs...")
+		for {
+			id = randomize()
+			err = playSong(id, repo)
+			if err != nil {
+				return err
+			}
+
+		}
+	} else {
+		fmt.Printf("Playing %s...\n", id)
+		err = playSong(id, repo)
 	}
 
+	return err
+}
+
+func playSong(id string, repo *repository.Repository) error {
 	reader, err := bluge.OpenReader(blugeConf)
 	if err != nil {
 		log.Fatalf("error getting index reader: %v", err)
@@ -112,6 +128,7 @@ func playSong(c *cli.Context) error {
 		return fmt.Errorf("MP3 '%s' not found in the repository.", fname)
 	}
 
+	fmt.Println()
 	for k, v := range meta {
 		printRow(k, v, headerColor)
 	}
