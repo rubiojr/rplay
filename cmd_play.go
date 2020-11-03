@@ -25,6 +25,9 @@ func init() {
 
 func playSong(c *cli.Context) error {
 	repo, err := rapi.OpenRepository(globalOptions)
+	if err != nil {
+		return err
+	}
 	id := c.Args().Get(0)
 
 	reader, err := bluge.OpenReader(blugeConf)
