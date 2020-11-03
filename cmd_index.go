@@ -44,7 +44,6 @@ var totalBlobs = 0
 var lastScanned = "Waiting for MP3s to be found..."
 var alreadyIndexed = 0
 var indexLoaded = false
-var blugeReader *bluge.Reader
 var metadataErrors = 0
 var tStart = time.Now()
 
@@ -122,17 +121,11 @@ func wasIndexed(id string) (bool, error) {
 		return false, nil
 	}
 	var err error
-	if blugeReader == nil {
-		blugeReader, err = bluge.OpenReader(blugeConf)
-		if err != nil {
-			panic(err)
-		}
-	}
 
 	query := bluge.NewWildcardQuery(id).SetField("_id")
 	request := bluge.NewAllMatches(query)
 
-	documentMatchIterator, err := blugeReader.Search(context.Background(), request)
+	documentMatchIterator, err := blugeReader().Search(context.Background(), request)
 	if err != nil {
 		panic(err)
 	}
@@ -237,11 +230,6 @@ func progressMonitor() {
 }
 
 func addToIndex(info fileInfo) error {
-	blugeWriter, err := bluge.OpenWriter(blugeConf)
-	if err != nil {
-		return err
-	}
-	defer blugeWriter.Close()
 	var artist, title, album, genre string
 	var year int
 	if info.id3Info != nil {
@@ -268,7 +256,7 @@ func addToIndex(info fileInfo) error {
 		AddField(bluge.NewTextField("repository_location", info.repoLocation).StoreValue().HighlightMatches()).
 		AddField(bluge.NewTextField("repository_id", info.repoId).StoreValue().HighlightMatches())
 
-	err = blugeWriter.Update(doc.ID(), doc)
+	err := blugeWriter().Update(doc.ID(), doc)
 	if err == nil {
 		indexedFiles += 1
 	}
