@@ -53,11 +53,12 @@ func search(q string, verbose, regexp bool) error {
 		reader.Close()
 	}()
 
+	nQuery := strings.ToLower(q)
 	var query bluge.Query
 	if regexp {
-		query = bluge.NewRegexpQuery(q).SetField("filename")
+		query = bluge.NewRegexpQuery(nQuery).SetField("filename")
 	} else {
-		query = bluge.NewWildcardQuery(q).SetField("filename")
+		query = bluge.NewWildcardQuery(nQuery).SetField("filename")
 	}
 
 	request := bluge.NewAllMatches(query).
