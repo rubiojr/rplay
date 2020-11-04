@@ -7,7 +7,7 @@ var bWriter *bluge.Writer
 
 func blugeReader() *bluge.Reader {
 	var err error
-	if bWriter == nil {
+	if bReader == nil {
 		bReader, err = bluge.OpenReader(blugeConf)
 		if err != nil {
 			panic(err)
