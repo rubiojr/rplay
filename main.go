@@ -99,3 +99,7 @@ func main() {
 		println(fmt.Sprintf("\n🛑 %s", err))
 	}
 }
+
+func needsIndex() bool {
+	return firstTimeIndex
+}

@@ -21,12 +21,24 @@ func init() {
 		Name:   "play",
 		Usage:  "Play a song (random if no argument given)",
 		Action: playCmd,
+		Before: func(c *cli.Context) error {
+			if needsIndex() {
+				return errNeedsIndex
+			}
+			return nil
+		},
 	}
 	appCommands = append(appCommands, cmd)
 	cmd = &cli.Command{
 		Name:   "random",
 		Usage:  "Play songs randomly and endlessly",
 		Action: playCmd,
+		Before: func(c *cli.Context) error {
+			if needsIndex() {
+				return errNeedsIndex
+			}
+			return nil
+		},
 	}
 	appCommands = append(appCommands, cmd)
 }

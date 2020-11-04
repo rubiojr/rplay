@@ -31,8 +31,8 @@ func init() {
 			},
 		},
 		Before: func(c *cli.Context) error {
-			if !exist(indexPath) {
-				return errors.New("rplay index does not exist. Use 'rplay index' to create it first.\n")
+			if needsIndex() {
+				return errNeedsIndex
 			}
 			return nil
 		},
