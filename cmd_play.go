@@ -12,6 +12,7 @@ import (
 	"github.com/rubiojr/rapi"
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
+	"github.com/schollz/spinner"
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,34 +23,36 @@ func init() {
 		Action: playCmd,
 	}
 	appCommands = append(appCommands, cmd)
+	cmd = &cli.Command{
+		Name:   "random",
+		Usage:  "Play songs randomly and endlessly",
+		Action: playCmd,
+	}
+	appCommands = append(appCommands, cmd)
 }
 
 func randomize() string {
-	var found string
-
-	query := bluge.NewWildcardQuery("*").SetField("_id")
+	query := bluge.NewMatchPhraseQuery(globalOptions.Repo).SetField("repository_location")
 	request := bluge.NewAllMatches(query)
 
-	c, _ := blugeReader().Count()
-	rand.Seed(time.Now().UnixNano())
-	r := rand.Intn(int(c))
-
+	var hits []string
 	documentMatchIterator, err := blugeReader().Search(context.Background(), request)
-	counter := int(0)
 	match, err := documentMatchIterator.Next()
-	for err == nil && match != nil && counter < r {
+	for err == nil && match != nil {
 		err = match.VisitStoredFields(func(field string, value []byte) bool {
 			if field == "_id" {
-				found = string(value)
+				hits = append(hits, string(value))
 			}
 			return true
 		})
 
-		counter += 1
 		match, err = documentMatchIterator.Next()
 	}
 
-	return found
+	rand.Seed(time.Now().UnixNano())
+	r := rand.Intn(len(hits))
+
+	return hits[r]
 }
 
 func playCmd(c *cli.Context) error {
@@ -78,6 +81,10 @@ func playCmd(c *cli.Context) error {
 }
 
 func playSong(id string, repo *repository.Repository) error {
+	fmt.Println()
+	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	s.Color("fgMagenta")
+	s.Suffix = " Next song found, loading..."
 	reader, err := bluge.OpenReader(blugeConf)
 	if err != nil {
 		log.Fatalf("error getting index reader: %v", err)
@@ -132,6 +139,8 @@ func playSong(id string, repo *repository.Repository) error {
 	for k, v := range meta {
 		printRow(k, v, headerColor)
 	}
+
+	s.Stop()
 	play(blobBytes)
 	return nil
 }
