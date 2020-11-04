@@ -125,8 +125,8 @@ RPlay is an experiment quickly built in a few days thanks to the following proje
 
 * [restic](https://restic.net) (via [RAPI](https://github.com/rubiojr/rapi))
 * [go-mp3](https://github.com/hajimehoshi/go-mp3)
-* [oto](https://github.com/hajimehoshi/go-mp3)
-* [urfave/cli](https://github.com/urfave/cli/blob/master/docs/v2/manual.md)
+* [oto](https://github.com/hajimehoshi/oto)
+* [urfave/cli](https://github.com/urfave/cli)
 * [bluge](https://github.com/blugelabs/bluge)
 * [go-app-paths](https://github.com/muesli/go-app-paths)
 * [reflow](https://github.com/muesli/reflow)
