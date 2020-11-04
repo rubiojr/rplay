@@ -11,6 +11,18 @@ A command line MP3 player for your [Restic repository](https://restic.net).
 * Random, endless playback
 * macOS and Linux supported
 
+## Installation
+
+Binaries for Linux are available in [the releases page](https://github.com/rubiojr/rplay/releases/latest).
+
+You'll need to build from source for macOS and other Linux architectures:
+
+```
+GO111MODULE=on go get -u github.com/rubiojr/rapi
+```
+
+Or clone the repository and run `go build`.
+
 ## Usage
 
 ### ⚠️ A word of caution
@@ -105,13 +117,6 @@ export RESTIC_PASSWORD=secret
 
 * Play and search songs by ID3 tags (artist, album, genre, etc).
 * Better curses UI
-
-
-Explain what stats mean:
-
-new, skipped errors, f/s, minutes left
-
-Explain how to log errors, redirecting stderr to file.
 
 ## Credits
 
