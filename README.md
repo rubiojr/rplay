@@ -117,6 +117,7 @@ export RESTIC_PASSWORD=secret
 
 * Play and search songs by ID3 tags (artist, album, genre, etc).
 * Better curses UI
+* Flag songs as hidden/unwanted
 
 ## Credits
 
