@@ -13,13 +13,13 @@ import (
 	"time"
 
 	"github.com/blugelabs/bluge"
+	"github.com/briandowns/spinner"
 	"github.com/dhowden/tag"
 	"github.com/muesli/reflow/ansi"
 	"github.com/muesli/reflow/padding"
 	"github.com/rubiojr/rapi"
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
-	"github.com/schollz/spinner"
 	"github.com/urfave/cli/v2"
 )
 
