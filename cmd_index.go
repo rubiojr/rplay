@@ -72,6 +72,8 @@ func indexRepo(cli *cli.Context) error {
 	}
 	ctx := context.Background()
 
+	defer blugeWriter().Close()
+
 	go progressMonitor()
 	if err = repo.LoadIndex(ctx); err != nil {
 		return err
