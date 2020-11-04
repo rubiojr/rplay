@@ -207,7 +207,7 @@ func progressMonitor() {
 	remaining := ""
 	for {
 		ls := ansi.TruncateWithTail(lastScanned, statusStrLen, "...")
-		rate := float64(scannedBlobs*1000000000) / float64(time.Now().Sub(tStart))
+		rate := float64(scannedBlobs*1000000000) / float64(time.Since(tStart))
 		remainingSec := (float64(totalBlobs-scannedBlobs) / rate)
 		if remainingSec < 3600 {
 			remaining = fmt.Sprintf("%.2f minutes", remainingSec/60)

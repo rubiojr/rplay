@@ -28,7 +28,3 @@ func blugeWriter() *bluge.Writer {
 
 	return bWriter
 }
-
-func blugeClose() error {
-	return blugeWriter().Close()
-}

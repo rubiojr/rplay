@@ -14,7 +14,6 @@ import (
 )
 
 var appCommands []*cli.Command
-var repoPath string
 var globalOptions = rapi.DefaultOptions
 var blugeConf bluge.Config
 var dataDir string
@@ -24,20 +23,7 @@ var exitCh = make(chan os.Signal, 1)
 
 func exist(file string) bool {
 	_, err := os.Stat(file)
-	if err == nil {
-		return true
-	}
-
-	return false
-}
-
-func isDir(file string) bool {
-	fi, err := os.Stat(file)
-	if err == nil {
-		return true
-	}
-
-	return fi.IsDir()
+	return err == nil
 }
 
 func init() {

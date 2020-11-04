@@ -43,12 +43,16 @@ func init() {
 	appCommands = append(appCommands, cmd)
 }
 
-func randomize() string {
+func randomize() (string, error) {
 	query := bluge.NewMatchPhraseQuery(globalOptions.Repo).SetField("repository_location")
 	request := bluge.NewAllMatches(query)
 
-	var hits []string
+	hits := []string{}
 	documentMatchIterator, err := blugeReader().Search(context.Background(), request)
+	if err != nil {
+		return "", err
+	}
+
 	match, err := documentMatchIterator.Next()
 	for err == nil && match != nil {
 		err = match.VisitStoredFields(func(field string, value []byte) bool {
@@ -57,14 +61,27 @@ func randomize() string {
 			}
 			return true
 		})
+		if err != nil {
+			return "", err
+		}
 
 		match, err = documentMatchIterator.Next()
+	}
+	if err != nil {
+		return "", err
 	}
 
 	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(len(hits))
 
-	return hits[r]
+	var hit string
+	if len(hits) > 0 {
+		hit = hits[r]
+	} else {
+		hit = ""
+	}
+
+	return hit, err
 }
 
 func playCmd(c *cli.Context) error {
@@ -77,12 +94,15 @@ func playCmd(c *cli.Context) error {
 	if id == "" {
 		fmt.Println("Playing a random selection of songs...")
 		for {
-			id = randomize()
-			err = playSong(id, repo)
+			id, err = randomize()
 			if err != nil {
 				return err
 			}
 
+			err = playSong(id, repo)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		fmt.Printf("Playing %s...\n", id)
@@ -144,7 +164,7 @@ func playSong(id string, repo *repository.Repository) error {
 		log.Fatalf("error loading stored fields: %v", err)
 	}
 	if blobBytes == nil {
-		return fmt.Errorf("MP3 '%s' not found in the repository.", fname)
+		return fmt.Errorf("MP3 '%s' not found in the repository", fname)
 	}
 
 	fmt.Println()
