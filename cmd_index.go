@@ -66,13 +66,13 @@ func init() {
 }
 
 func indexRepo(cli *cli.Context) error {
-	go progressMonitor()
 	repo, err := rapi.OpenRepository(globalOptions)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
 
+	go progressMonitor()
 	if err = repo.LoadIndex(ctx); err != nil {
 		return err
 	}
