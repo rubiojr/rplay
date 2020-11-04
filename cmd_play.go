@@ -96,7 +96,7 @@ func playSong(id string, repo *repository.Repository) error {
 	fmt.Println()
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	s.Color("fgMagenta")
-	s.Suffix = " Next song found, loading..."
+	s.Suffix = " Song found, loading..."
 	reader, err := bluge.OpenReader(blugeConf)
 	if err != nil {
 		log.Fatalf("error getting index reader: %v", err)
