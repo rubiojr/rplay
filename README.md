@@ -1,5 +1,8 @@
 # RPlay
 
+[![CI Status](https://github.com/rubiojr/rplay/workflows/ci/badge.svg)](https://github.com/rubiojr/rplay/actions)
+[![Go ReportCard](http://goreportcard.com/badge/rubiojr/rplay)](http://goreportcard.com/report/rubiojr/rplay)
+
 A command line MP3 player for your [Restic repository](https://restic.net).
 
 ## Features
@@ -18,7 +21,7 @@ Binaries for Linux are available in [the releases page](https://github.com/rubio
 You'll need to build from source for macOS and other Linux architectures:
 
 ```
-GO111MODULE=on go get -u github.com/rubiojr/rapi
+GO111MODULE=on go get -u github.com/rubiojr/rplay
 ```
 
 Or clone the repository and run `go build`.
