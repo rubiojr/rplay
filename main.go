@@ -52,6 +52,7 @@ func main() {
 	app := &cli.App{
 		Name:     "rapi",
 		Commands: []*cli.Command{},
+		Version:  "v0.1.1",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "repo",
