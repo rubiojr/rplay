@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo
+echo "Running integration tests..."
+echo
+
+unset RESTIC_REPOSITORY
+unset RESTIC_PASSWORD
+export PATH=./integration/vendor:./integration/vendor/bats/bin:$PATH
+
+./script/init-test-repo > /dev/null
+. ./script/creds
+
+if [ "$(uname)" = "Linux" ]; then
+  bats -r integration
+fi
