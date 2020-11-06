@@ -66,6 +66,7 @@ func init() {
 }
 
 func indexRepo(cli *cli.Context) error {
+	initApp()
 	repo, err := rapi.OpenRepository(globalOptions)
 	if err != nil {
 		return err
@@ -119,11 +120,6 @@ func indexRepo(cli *cli.Context) error {
 }
 
 func wasIndexed(id string) (bool, error) {
-	if firstTimeIndex {
-		return false, nil
-	}
-	var err error
-
 	query := bluge.NewWildcardQuery(id).SetField("_id")
 	request := bluge.NewAllMatches(query)
 

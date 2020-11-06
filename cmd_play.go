@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -21,24 +22,12 @@ func init() {
 		Name:   "play",
 		Usage:  "Play a song (random if no argument given)",
 		Action: playCmd,
-		Before: func(c *cli.Context) error {
-			if needsIndex() {
-				return errNeedsIndex
-			}
-			return nil
-		},
 	}
 	appCommands = append(appCommands, cmd)
 	cmd = &cli.Command{
 		Name:   "random",
 		Usage:  "Play songs randomly and endlessly",
 		Action: playCmd,
-		Before: func(c *cli.Context) error {
-			if needsIndex() {
-				return errNeedsIndex
-			}
-			return nil
-		},
 	}
 	appCommands = append(appCommands, cmd)
 }
@@ -71,6 +60,10 @@ func randomize() (string, error) {
 		return "", err
 	}
 
+	if len(hits) == 0 {
+		return "", errors.New("no songs found")
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(len(hits))
 
@@ -85,6 +78,7 @@ func randomize() (string, error) {
 }
 
 func playCmd(c *cli.Context) error {
+	initApp()
 	repo, err := rapi.OpenRepository(globalOptions)
 	if err != nil {
 		return err

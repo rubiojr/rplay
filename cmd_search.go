@@ -30,17 +30,12 @@ func init() {
 				Required: false,
 			},
 		},
-		Before: func(c *cli.Context) error {
-			if needsIndex() {
-				return errNeedsIndex
-			}
-			return nil
-		},
 	}
 	appCommands = append(appCommands, cmd)
 }
 
 func doSearch(c *cli.Context) error {
+	initApp()
 	return search(c.Args().Get(0), c.Bool("verbose"), c.Bool("regexp"))
 }
 

@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"syscall"
 
 	"github.com/blugelabs/bluge"
 	gap "github.com/muesli/go-app-paths"
@@ -17,8 +15,7 @@ var appCommands []*cli.Command
 var globalOptions = rapi.DefaultOptions
 var blugeConf bluge.Config
 var dataDir string
-var indexPath string
-var firstTimeIndex = false
+var indexPath = defaultIndexPath()
 var exitCh = make(chan os.Signal, 1)
 
 func exist(file string) bool {
@@ -26,25 +23,22 @@ func exist(file string) bool {
 	return err == nil
 }
 
-func init() {
+func initApp() {
+	os.MkdirAll(defaultIndexDir(), 0755)
+	blugeConf = bluge.DefaultConfig(indexPath)
+}
+
+func defaultIndexDir() string {
 	scope := gap.NewScope(gap.User, "rplay")
 	dirs, err := scope.DataDirs()
 	if err != nil {
 		panic(err)
 	}
-	dataDir = dirs[0]
-	os.MkdirAll(dataDir, 0755)
+	return dirs[0]
+}
 
-	indexPath = filepath.Join(dataDir, "rplay.bluge")
-	blugeConf = bluge.DefaultConfig(indexPath)
-	if !exist(indexPath) {
-		firstTimeIndex = true
-	}
-	go func() {
-		<-exitCh
-		os.Exit(0)
-	}()
-	signal.Notify(exitCh, syscall.SIGINT)
+func defaultIndexPath() string {
+	return filepath.Join(defaultIndexDir(), "rplay.bluge")
 }
 
 func main() {
@@ -71,6 +65,13 @@ func main() {
 				Destination: &globalOptions.Password,
 				DefaultText: " ",
 			},
+			&cli.StringFlag{
+				Name:        "index-path",
+				Usage:       "Index path",
+				Required:    false,
+				Destination: &indexPath,
+				Value:       defaultIndexPath(),
+			},
 			&cli.BoolFlag{
 				Name:     "debug",
 				Aliases:  []string{"d"},
@@ -85,8 +86,4 @@ func main() {
 	if err != nil {
 		println(fmt.Sprintf("\n🛑 %s", err))
 	}
-}
-
-func needsIndex() bool {
-	return firstTimeIndex
 }
