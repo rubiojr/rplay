@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -168,7 +169,6 @@ func playSong(id string, repo *repository.Repository) error {
 }
 
 func fetchBlobs(repo *repository.Repository, value []byte) ([]byte, error) {
-	var blobBytes []byte
 	var blobs []string
 
 	err := json.Unmarshal(value, &blobs)
@@ -176,14 +176,15 @@ func fetchBlobs(repo *repository.Repository, value []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	blobBytes := [][]byte{}
 	for _, id := range blobs {
 		rid, _ := restic.ParseID(id)
 		bytes, err := repo.LoadBlob(context.Background(), restic.DataBlob, rid, nil)
 		if err != nil {
 			return nil, err
 		}
-		blobBytes = append(blobBytes, bytes...)
+		blobBytes = append(blobBytes, bytes)
 	}
 
-	return blobBytes, nil
+	return bytes.Join(blobBytes, []byte("")), nil
 }
