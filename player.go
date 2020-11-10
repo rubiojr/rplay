@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"io"
 
 	"github.com/hajimehoshi/oto"
@@ -9,7 +10,26 @@ import (
 	"github.com/hajimehoshi/go-mp3"
 )
 
-func play(b []byte) error {
+type readerCtx struct {
+	ctx context.Context
+	r   io.Reader
+}
+
+func (r *readerCtx) Read(p []byte) (n int, err error) {
+	if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return r.r.Read(p)
+}
+
+func NewReader(ctx context.Context, r io.Reader) io.Reader {
+	return &readerCtx{
+		ctx: ctx,
+		r:   r,
+	}
+}
+
+func play(ctx context.Context, b []byte) error {
 	f := bytes.NewReader(b)
 
 	d, err := mp3.NewDecoder(f)
@@ -23,11 +43,9 @@ func play(b []byte) error {
 	}
 	defer c.Close()
 
-	p := c.NewPlayer()
-	defer p.Close()
+	player := c.NewPlayer()
+	defer player.Close()
 
-	if _, err := io.Copy(p, d); err != nil {
-		return err
-	}
-	return nil
+	_, err = io.Copy(player, NewReader(ctx, d))
+	return err
 }

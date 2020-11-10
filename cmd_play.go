@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/blugelabs/bluge"
@@ -94,27 +97,58 @@ func playCmd(c *cli.Context) error {
 
 	id := c.Args().Get(0)
 	if id == "" {
-		fmt.Println("Playing a random selection of songs...")
-		for {
-			id, err = randomize()
-			if err != nil {
-				return err
-			}
-
-			err = playSong(id, repo)
-			if err != nil {
-				return err
-			}
-		}
+		err = randomizeSongs(repo)
 	} else {
 		fmt.Printf("Playing %s...\n", id)
-		err = playSong(id, repo)
+		err = playSong(context.Background(), id, repo)
 	}
 
 	return err
 }
 
-func playSong(id string, repo *repository.Repository) error {
+func randomizeSongs(repo *repository.Repository) error {
+	signal_chan := make(chan os.Signal, 1)
+	signal.Notify(signal_chan, syscall.SIGINT)
+	ctx, cancel := context.WithCancel(context.Background())
+	lastCancel := time.Now()
+	go func() {
+		for {
+			s := <-signal_chan
+			switch s {
+			case syscall.SIGINT:
+				now := time.Now()
+				if time.Since(lastCancel) < 2*time.Second {
+					os.Exit(0)
+				}
+				lastCancel = now
+				cancel()
+			default:
+			}
+		}
+	}()
+
+	fmt.Println("Playing a random selection of songs...")
+	fmt.Println("Ctrl-C once to play the next song, twice to exit.")
+	for {
+		id, err := randomize()
+		if err != nil {
+			return err
+		}
+
+		err = playSong(ctx, id, repo)
+		switch err {
+		case context.Canceled:
+			ctx, cancel = context.WithCancel(context.Background())
+			continue
+		case nil:
+			continue
+		default:
+			return err
+		}
+	}
+}
+
+func playSong(ctx context.Context, id string, repo *repository.Repository) error {
 	fmt.Println()
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	s.Color("fgMagenta")
@@ -148,7 +182,7 @@ func playSong(id string, repo *repository.Repository) error {
 			fname = string(value)
 			return true
 		}
-		if field != "repository_id" && field != "repository_location" && field != "_id" {
+		if field != "repository_id" && field != "repository_location" && field != "_id" && field != "mod_time" {
 			meta[field] = string(value)
 		}
 		return true
@@ -165,7 +199,7 @@ func playSong(id string, repo *repository.Repository) error {
 	}
 
 	s.Stop()
-	return play(blobBytes)
+	return play(ctx, blobBytes)
 }
 
 func fetchBlobs(repo *repository.Repository, value []byte) ([]byte, error) {
