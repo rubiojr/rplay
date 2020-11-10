@@ -43,8 +43,9 @@ func init() {
 func indexRepo(cli *cli.Context) error {
 	progress := make(chan rindex.IndexStats, 10)
 	idxOpts := &rindex.IndexOptions{
-		Filter:    "*.mp3",
-		IndexPath: cli.String("index-path"),
+		Filter:         "*.mp3",
+		IndexPath:      cli.String("index-path"),
+		AppendFileMeta: true,
 	}
 	go progressMonitor(progress)
 
@@ -64,8 +65,6 @@ func indexRepo(cli *cli.Context) error {
 type MP3Indexer struct{}
 
 func (i *MP3Indexer) ShouldIndex(fileID string, bindex *blugeindex.BlugeIndex, node *restic.Node, repo *repository.Repository) (*bluge.Document, bool) {
-	repoId := repo.Config().ID
-	repoLocation := repo.Backend().Location()
 	buf, err := repo.LoadBlob(context.Background(), restic.DataBlob, node.Content[0], nil)
 	var id3Info tag.Metadata
 	if err == nil {
@@ -85,15 +84,11 @@ func (i *MP3Indexer) ShouldIndex(fileID string, bindex *blugeindex.BlugeIndex, n
 		year = id3Info.Year()
 	}
 	doc := bluge.NewDocument(fileID).
-		AddField(bluge.NewTextField("filename", node.Name).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("blobs", blobsToString(node.Content)).StoreValue()).
 		AddField(bluge.NewTextField("artist", artist).StoreValue().HighlightMatches()).
 		AddField(bluge.NewTextField("title", title).StoreValue().HighlightMatches()).
 		AddField(bluge.NewTextField("album", album).StoreValue().HighlightMatches()).
 		AddField(bluge.NewTextField("genre", genre).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("year", strconv.Itoa(year)).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("repository_location", repoLocation).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("repository_id", repoId).StoreValue().HighlightMatches())
+		AddField(bluge.NewTextField("year", strconv.Itoa(year)).StoreValue().HighlightMatches())
 	return doc, true
 }
 
