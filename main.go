@@ -44,9 +44,9 @@ func defaultIndexPath() string {
 func main() {
 	var err error
 	app := &cli.App{
-		Name:     "rapi",
+		Name:     "rplay",
 		Commands: []*cli.Command{},
-		Version:  "v0.1.1",
+		Version:  "v0.2",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "repo",

@@ -17,6 +17,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var repoID = ""
+
 func init() {
 	cmd := &cli.Command{
 		Name:   "play",
@@ -33,7 +35,7 @@ func init() {
 }
 
 func randomize() (string, error) {
-	query := bluge.NewMatchPhraseQuery(globalOptions.Repo).SetField("repository_location")
+	query := bluge.NewMatchPhraseQuery(repoID).SetField("repository_id")
 	request := bluge.NewAllMatches(query)
 
 	hits := []string{}
@@ -80,6 +82,7 @@ func randomize() (string, error) {
 func playCmd(c *cli.Context) error {
 	initApp()
 	repo, err := rapi.OpenRepository(globalOptions)
+	repoID = repo.Config().ID
 	if err != nil {
 		return err
 	}
