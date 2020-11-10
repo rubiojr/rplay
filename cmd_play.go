@@ -18,6 +18,7 @@ import (
 )
 
 var repoID = ""
+var playerReader *bluge.Reader
 
 func init() {
 	cmd := &cli.Command{
@@ -39,7 +40,7 @@ func randomize() (string, error) {
 	request := bluge.NewAllMatches(query)
 
 	hits := []string{}
-	documentMatchIterator, err := blugeReader().Search(context.Background(), request)
+	documentMatchIterator, err := playerReader.Search(context.Background(), request)
 	if err != nil {
 		return "", err
 	}
@@ -74,6 +75,10 @@ func randomize() (string, error) {
 
 func playCmd(c *cli.Context) error {
 	initApp()
+
+	playerReader = blugeReader()
+	defer playerReader.Close()
+
 	repo, err := rapi.OpenRepository(globalOptions)
 	if err != nil {
 		return err
@@ -113,20 +118,10 @@ func playSong(id string, repo *repository.Repository) error {
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	s.Color("fgMagenta")
 	s.Suffix = " Song found, loading..."
-	reader, err := bluge.OpenReader(blugeConf)
-	if err != nil {
-		log.Fatalf("error getting index reader: %v", err)
-	}
-	defer func() {
-		err = reader.Close()
-		if err != nil {
-			log.Fatalf("error closing reader: %v", err)
-		}
-	}()
 
 	query := bluge.NewMatchQuery(id).SetField("_id")
 	request := bluge.NewAllMatches(query)
-	documentMatchIterator, err := reader.Search(context.Background(), request)
+	documentMatchIterator, err := playerReader.Search(context.Background(), request)
 	if err != nil {
 		log.Fatalf("error executing search: %v", err)
 	}
@@ -150,6 +145,7 @@ func playSong(id string, repo *repository.Repository) error {
 		}
 		if field == "filename" {
 			fname = string(value)
+			return true
 		}
 		if field != "repository_id" && field != "repository_location" && field != "_id" {
 			meta[field] = string(value)
