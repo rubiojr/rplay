@@ -82,10 +82,10 @@ func randomize() (string, error) {
 func playCmd(c *cli.Context) error {
 	initApp()
 	repo, err := rapi.OpenRepository(globalOptions)
-	repoID = repo.Config().ID
 	if err != nil {
 		return err
 	}
+	repoID = repo.Config().ID
 
 	id := c.Args().Get(0)
 	if id == "" {
