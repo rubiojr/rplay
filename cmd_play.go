@@ -78,6 +78,12 @@ func playCmd(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	err = repo.LoadIndex(context.Background())
+	if err != nil {
+		return err
+	}
+
 	repoID = repo.Config().ID
 
 	id := c.Args().Get(0)
@@ -156,19 +162,16 @@ func playSong(id string, repo *repository.Repository) error {
 	if blobBytes == nil {
 		return fmt.Errorf("MP3 '%s' not found in the repository", fname)
 	}
-
 	fmt.Println()
 	for k, v := range meta {
 		printRow(k, v, headerColor)
 	}
 
 	s.Stop()
-	play(blobBytes)
-	return nil
+	return play(blobBytes)
 }
 
 func fetchBlobs(repo *repository.Repository, value []byte) ([]byte, error) {
-	repo.LoadIndex(context.Background())
 	var blobBytes []byte
 	var blobs []string
 
