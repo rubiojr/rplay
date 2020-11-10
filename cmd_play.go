@@ -69,14 +69,7 @@ func randomize() (string, error) {
 	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(len(hits))
 
-	var hit string
-	if len(hits) > 0 {
-		hit = hits[r]
-	} else {
-		hit = ""
-	}
-
-	return hit, err
+	return hits[r], err
 }
 
 func playCmd(c *cli.Context) error {
