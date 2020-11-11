@@ -22,7 +22,6 @@ import (
 )
 
 var repoID = ""
-var playerReader *bluge.Reader
 
 func init() {
 	cmd := &cli.Command{
@@ -44,6 +43,13 @@ func randomize() (string, error) {
 	request := bluge.NewAllMatches(query)
 
 	hits := []string{}
+
+	playerReader, err := bluge.OpenReader(blugeConf)
+	if err != nil {
+		return "", errNeedsIndex
+	}
+	defer playerReader.Close()
+
 	documentMatchIterator, err := playerReader.Search(context.Background(), request)
 	if err != nil {
 		return "", err
@@ -80,16 +86,17 @@ func randomize() (string, error) {
 func playCmd(c *cli.Context) error {
 	initApp()
 
+	// Fail fast if index does not exist
+	playerReader, err := bluge.OpenReader(blugeConf)
+	if err != nil {
+		return errNeedsIndex
+	}
+	playerReader.Close()
+
 	repo, err := rapi.OpenRepository(globalOptions)
 	if err != nil {
 		return err
 	}
-
-	playerReader, err = bluge.OpenReader(blugeConf)
-	if err != nil {
-		return errNeedsIndex
-	}
-	defer playerReader.Close()
 
 	err = repo.LoadIndex(context.Background())
 	if err != nil {
@@ -159,6 +166,12 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 
 	query := bluge.NewMatchQuery(id).SetField("_id")
 	request := bluge.NewAllMatches(query)
+
+	playerReader, err := bluge.OpenReader(blugeConf)
+	if err != nil {
+		return errNeedsIndex
+	}
+	defer playerReader.Close()
 	documentMatchIterator, err := playerReader.Search(context.Background(), request)
 	if err != nil {
 		log.Fatalf("error executing search: %v", err)
