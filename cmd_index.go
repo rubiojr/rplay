@@ -47,7 +47,7 @@ func indexRepo(cli *cli.Context) error {
 		IndexPath:      cli.String("index-path"),
 		AppendFileMeta: true,
 	}
-	go progressMonitor(progress)
+	go progressMonitor(cli.Bool("log-errors"), progress)
 
 	stats, err := rindex.CustomIndex(idxOpts, &MP3Indexer{}, progress)
 	if err != nil {
@@ -92,13 +92,23 @@ func (i *MP3Indexer) ShouldIndex(fileID string, bindex *blugeindex.BlugeIndex, n
 	return doc, true
 }
 
-func progressMonitor(progress chan rindex.IndexStats) {
+func progressMonitor(logErrors bool, progress chan rindex.IndexStats) {
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	s.Color("fgGreen")
 	s.Suffix = " Analyzing the repository..."
+	lastError := ""
 	for {
 		select {
 		case p := <-progress:
+			if logErrors {
+				if len(p.Errors) > 0 {
+					e := p.Errors[len(p.Errors)-1].Error()
+					if e != lastError {
+						fmt.Println("\n", e)
+						lastError = e
+					}
+				}
+			}
 			lm := p.LastMatch
 			if lm == "" {
 				lm = "Searching for MP3 files..."
