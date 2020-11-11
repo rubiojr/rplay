@@ -22,7 +22,7 @@ require (
 	github.com/philhofer/fwd v1.1.0 // indirect
 	github.com/pkg/xattr v0.4.2 // indirect
 	github.com/rubiojr/rapi v0.0.0-20201105183828-9566648c5c9b
-	github.com/rubiojr/rindex v0.0.0-20201110132937-848a06bcab80
+	github.com/rubiojr/rindex v0.0.0-20201111100415-b3c1923c3a20
 	github.com/tinylib/msgp v1.1.3 // indirect
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/willf/bitset v1.1.11 // indirect

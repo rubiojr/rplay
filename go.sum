@@ -333,6 +333,8 @@ github.com/rubiojr/rapi v0.0.0-20201105183828-9566648c5c9b h1:WFAHOF6GE9oR8qsH/k
 github.com/rubiojr/rapi v0.0.0-20201105183828-9566648c5c9b/go.mod h1:1NAgbvCOoKC04OYDRn7SvK3kqTd44K/Qox1cz4uvr0A=
 github.com/rubiojr/rindex v0.0.0-20201110132937-848a06bcab80 h1:YSWelk/Fp0IAIQl1FLCrx5nCrq74couUEIRGvbDsYqk=
 github.com/rubiojr/rindex v0.0.0-20201110132937-848a06bcab80/go.mod h1:4/M/PdtIM/Wm9+Bx6/WQUZ0pdx4Rd00/Dj4IB4mWapU=
+github.com/rubiojr/rindex v0.0.0-20201111100415-b3c1923c3a20 h1:sOmfzMon3M+qKr2nYxVq3cvmBMoScM41KqcBU16Mif0=
+github.com/rubiojr/rindex v0.0.0-20201111100415-b3c1923c3a20/go.mod h1:4/M/PdtIM/Wm9+Bx6/WQUZ0pdx4Rd00/Dj4IB4mWapU=
 github.com/russross/blackfriday v1.5.2 h1:HyvC0ARfnZBqnXwABFeSZHpKvJHJJfPz81GNueLj0oo=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/russross/blackfriday/v2 v2.0.1 h1:lPqVAte+HuHNfhJ/0LC98ESWRz8afy9tM/0RK8m9o+Q=
