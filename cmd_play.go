@@ -80,7 +80,10 @@ func randomize() (string, error) {
 func playCmd(c *cli.Context) error {
 	initApp()
 
-	playerReader = blugeReader()
+	playerReader, err := bluge.OpenReader(blugeConf)
+	if err != nil {
+		return errNeedsIndex
+	}
 	defer playerReader.Close()
 
 	repo, err := rapi.OpenRepository(globalOptions)
