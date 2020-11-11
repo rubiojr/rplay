@@ -85,7 +85,7 @@ func playCmd(c *cli.Context) error {
 		return err
 	}
 
-	playerReader, err := bluge.OpenReader(blugeConf)
+	playerReader, err = bluge.OpenReader(blugeConf)
 	if err != nil {
 		return errNeedsIndex
 	}
