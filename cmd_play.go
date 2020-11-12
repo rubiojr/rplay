@@ -15,6 +15,8 @@ import (
 
 	"github.com/blugelabs/bluge"
 	"github.com/briandowns/spinner"
+	"github.com/h2non/filetype"
+	"github.com/muesli/reflow/truncate"
 	"github.com/rubiojr/rapi"
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
@@ -153,7 +155,7 @@ func randomizeSongs(repo *repository.Repository) error {
 		case nil:
 			continue
 		default:
-			return err
+			fmt.Printf("🛑 %v.", err)
 		}
 	}
 }
@@ -204,17 +206,27 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 		return true
 	})
 	if err != nil {
-		log.Fatalf("error loading stored fields: %v", err)
+		return err
 	}
 	if blobBytes == nil {
 		return fmt.Errorf("MP3 '%s' not found in the repository", fname)
 	}
+
+	s.Stop()
 	fmt.Println()
+
+	kind, err := filetype.Match(blobBytes)
+	if err != nil {
+		return err
+	}
+	if kind.MIME.Value != "audio/mpeg" {
+		return fmt.Errorf("damaged song '%s' found", truncate.StringWithTail(fname, 40, "..."))
+	}
+
 	for k, v := range meta {
 		printRow(k, v, headerColor)
 	}
 
-	s.Stop()
 	return play(ctx, blobBytes)
 }
 

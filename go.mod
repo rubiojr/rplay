@@ -13,6 +13,7 @@ require (
 	github.com/dhowden/tag v0.0.0-20200828214007-46e57f75dbfc
 	github.com/glycerine/go-unsnap-stream v0.0.0-20190901134440-81cf024a9e0a // indirect
 	github.com/golang/snappy v0.0.2 // indirect
+	github.com/h2non/filetype v1.1.0
 	github.com/hajimehoshi/go-mp3 v0.3.1
 	github.com/hajimehoshi/oto v0.6.6
 	github.com/mschoch/smat v0.2.0 // indirect
