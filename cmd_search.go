@@ -1,14 +1,11 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/blugelabs/bluge"
-	qs "github.com/blugelabs/query_string"
+	"github.com/rubiojr/rindex/blugeindex"
 	"github.com/urfave/cli/v2"
 )
 
@@ -24,12 +21,6 @@ func init() {
 				Usage:    "Enable verbose output",
 				Required: false,
 			},
-			&cli.BoolFlag{
-				Name:     "regexp",
-				Aliases:  []string{"r"},
-				Usage:    "Query is a regular expression",
-				Required: false,
-			},
 		},
 	}
 	appCommands = append(appCommands, cmd)
@@ -37,29 +28,18 @@ func init() {
 
 func doSearch(c *cli.Context) error {
 	initApp()
-	return search(c.Args().Get(0), c.Bool("verbose"), c.Bool("regexp"))
-}
-
-func search(q string, verbose, regexp bool) error {
-	reader, err := bluge.OpenReader(blugeConf)
-	if err != nil {
-		return errors.New("error opening index")
-	}
-	defer func() {
-		reader.Close()
-	}()
-
-	lq := strings.ToLower(q)
-	if q == "*" {
-		lq = "filename:*"
-	}
-	query, err := qs.ParseQueryString(lq, qs.DefaultOptions())
-	request := bluge.NewAllMatches(query).
-		WithStandardAggregations()
+	q := c.Args().Get(0)
+	verbose := c.Bool("verbose")
+	idx := blugeindex.NewBlugeIndex(c.String("index-path"), 0)
 
 	fmt.Printf("Searching for %s...\n", q)
 
-	documentMatchIterator, err := reader.Search(context.Background(), request)
+	reader, err := idx.OpenReader()
+	if err != nil {
+		return err
+	}
+
+	documentMatchIterator, err := idx.SearchWithReader(q, reader)
 	if err != nil {
 		return err
 	}

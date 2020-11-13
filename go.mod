@@ -8,7 +8,6 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.11 // indirect
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
 	github.com/blugelabs/bluge v0.1.4-0.20201021190638-c304a6733af6
-	github.com/blugelabs/query_string v0.1.0
 	github.com/briandowns/spinner v1.11.1
 	github.com/dgryski/go-metro v0.0.0-20200812162917-85c65e2d0165 // indirect
 	github.com/dhowden/tag v0.0.0-20200828214007-46e57f75dbfc
@@ -24,7 +23,7 @@ require (
 	github.com/philhofer/fwd v1.1.0 // indirect
 	github.com/pkg/xattr v0.4.2 // indirect
 	github.com/rubiojr/rapi v0.0.0-20201111125412-4758de24b28e
-	github.com/rubiojr/rindex v0.0.0-20201113102917-805546d8aee0
+	github.com/rubiojr/rindex v0.0.0-20201113124352-97fc497fd42f
 	github.com/tinylib/msgp v1.1.3 // indirect
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/willf/bitset v1.1.11 // indirect
