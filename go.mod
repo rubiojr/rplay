@@ -8,6 +8,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.11 // indirect
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
 	github.com/blugelabs/bluge v0.1.4-0.20201021190638-c304a6733af6
+	github.com/blugelabs/query_string v0.1.0
 	github.com/briandowns/spinner v1.11.1
 	github.com/dgryski/go-metro v0.0.0-20200812162917-85c65e2d0165 // indirect
 	github.com/dhowden/tag v0.0.0-20200828214007-46e57f75dbfc

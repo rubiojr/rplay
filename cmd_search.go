@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/blugelabs/bluge"
+	qs "github.com/blugelabs/query_string"
 	"github.com/urfave/cli/v2"
 )
 
@@ -48,14 +49,11 @@ func search(q string, verbose, regexp bool) error {
 		reader.Close()
 	}()
 
-	nQuery := strings.ToLower(q)
-	var query bluge.Query
-	if regexp {
-		query = bluge.NewRegexpQuery(nQuery).SetField("filename")
-	} else {
-		query = bluge.NewWildcardQuery(nQuery).SetField("filename")
+	lq := strings.ToLower(q)
+	if q == "*" {
+		lq = "filename:*"
 	}
-
+	query, err := qs.ParseQueryString(lq, qs.DefaultOptions())
 	request := bluge.NewAllMatches(query).
 		WithStandardAggregations()
 

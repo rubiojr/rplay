@@ -82,12 +82,15 @@ github.com/blevesearch/segment v0.9.0 h1:5lG7yBCx98or7gK2cHMKPukPZ/31Kag7nONpoBt
 github.com/blevesearch/segment v0.9.0/go.mod h1:9PfHYUdQCgHktBgvtUOF4x+pc4/l8rdH0u5spnW85UQ=
 github.com/blevesearch/snowballstem v0.9.0 h1:lMQ189YspGP6sXvZQ4WZ+MLawfV8wOmPoD/iWeNXm8s=
 github.com/blevesearch/snowballstem v0.9.0/go.mod h1:PivSj3JMc8WuaFkTSRDW2SlrulNWPl4ABg1tC/hlgLs=
+github.com/blugelabs/bluge v0.1.1/go.mod h1:Ah8c1+vYuQiL26j2SXwyt2OPQhcE75q9LTtUVQx0hYA=
 github.com/blugelabs/bluge v0.1.4-0.20201021190638-c304a6733af6 h1:tndTLZtPsTjwKvKr5J6S6zIcjzhMAv8PsHfRmNbMuW4=
 github.com/blugelabs/bluge v0.1.4-0.20201021190638-c304a6733af6/go.mod h1:Ah8c1+vYuQiL26j2SXwyt2OPQhcE75q9LTtUVQx0hYA=
 github.com/blugelabs/bluge_segment_api v0.1.0 h1:Z+rj+KYLpdblTAYSjBsuNC79dHB3Oc5exuDBEyAGPnk=
 github.com/blugelabs/bluge_segment_api v0.1.0/go.mod h1:tV1dxZRn5KUxlghf8qWwDs05TdcxaiW+TkXecb7nt54=
 github.com/blugelabs/ice v0.1.1 h1:H4EpKdiFSKKLMo0CLl4keCdHFEQIF+sMMUEds7SQBQs=
 github.com/blugelabs/ice v0.1.1/go.mod h1:qTvShx0ZvYCzF9r5yaHH9lA8a7S34f5xJILlMV/CnlU=
+github.com/blugelabs/query_string v0.1.0 h1:Yx6kdTvLR0x5YGQ3EXL+JHxYrprSytelVwV/oSw/wXw=
+github.com/blugelabs/query_string v0.1.0/go.mod h1:7YNC89WcILyoHNibe+iswtEyjC2Lr5kSJ5JPhKXm/4E=
 github.com/briandowns/spinner v1.11.1 h1:OixPqDEcX3juo5AjQZAnFPbeUA0jvkp2qzB5gOZJ/L0=
 github.com/briandowns/spinner v1.11.1/go.mod h1:QOuQk7x+EaDASo80FEXwlwiA+j/PPIcX3FScO+3/ZPQ=
 github.com/caio/go-tdigest v3.1.0+incompatible h1:uoVMJ3Q5lXmVLCCqaMGHLBWnbGoN6Lpu7OAUPR60cds=
