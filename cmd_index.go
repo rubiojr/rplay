@@ -24,6 +24,8 @@ var tStart = time.Now()
 
 const statusStrLen = 30
 
+type MP3Indexer struct{}
+
 func init() {
 	cmd := &cli.Command{
 		Name:   "index",
@@ -46,10 +48,11 @@ func indexRepo(cli *cli.Context) error {
 		Filter:         "*.mp3",
 		IndexPath:      cli.String("index-path"),
 		AppendFileMeta: true,
+		Indexer:        &MP3Indexer{},
 	}
 	go progressMonitor(cli.Bool("log-errors"), progress)
 
-	stats, err := rindex.CustomIndex(idxOpts, &MP3Indexer{}, progress)
+	stats, err := rindex.Index(idxOpts, progress)
 	if err != nil {
 		panic(err)
 	}
@@ -61,8 +64,6 @@ func indexRepo(cli *cli.Context) error {
 	)
 	return nil
 }
-
-type MP3Indexer struct{}
 
 func (i *MP3Indexer) ShouldIndex(fileID string, bindex *blugeindex.BlugeIndex, node *restic.Node, repo *repository.Repository) (*bluge.Document, bool) {
 	buf, err := repo.LoadBlob(context.Background(), restic.DataBlob, node.Content[0], nil)
