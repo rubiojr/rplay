@@ -64,6 +64,15 @@ func search(q string, verbose, regexp bool) error {
 		return err
 	}
 
+	filterField := func(name string) bool {
+		switch name {
+		case "_id", "album", "genre", "year", "filename", "title", "artist":
+			return false
+		default:
+			return true
+		}
+	}
+
 	match, err := documentMatchIterator.Next()
 	for err == nil && match != nil {
 		err = match.VisitStoredFields(func(field string, value []byte) bool {
@@ -71,7 +80,7 @@ func search(q string, verbose, regexp bool) error {
 			if field == "_id" {
 				f = "ID"
 			}
-			if (field == "tree_id" || field == "blobs" || field == "repository_id" || field == "repository_location") && !verbose {
+			if filterField(field) && !verbose {
 				return true
 			}
 			v := string(value)
