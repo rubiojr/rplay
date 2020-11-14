@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -69,7 +68,8 @@ func (i *MP3Indexer) ShouldIndex(fileID string, bindex *blugeindex.BlugeIndex, n
 	buf, err := repo.LoadBlob(context.Background(), restic.DataBlob, node.Content[0], nil)
 	var id3Info tag.Metadata
 	if err == nil {
-		id3Info, err = tag.ReadFrom(bytes.NewReader(buf))
+		// ignore errors when reading tags, we still want to index them
+		id3Info, _ = tag.ReadFrom(bytes.NewReader(buf))
 	}
 
 	artist := ""
@@ -130,12 +130,4 @@ func progressMonitor(logErrors bool, progress chan rindex.IndexStats) {
 		}
 	}
 	s.Stop()
-}
-
-func blobsToString(ids restic.IDs) string {
-	j, err := json.Marshal(ids)
-	if err != nil {
-		panic(err)
-	}
-	return string(j)
 }

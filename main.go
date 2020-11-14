@@ -14,14 +14,7 @@ import (
 var appCommands []*cli.Command
 var globalOptions = rapi.DefaultOptions
 var blugeConf bluge.Config
-var dataDir string
 var indexPath = defaultIndexPath()
-var exitCh = make(chan os.Signal, 1)
-
-func exist(file string) bool {
-	_, err := os.Stat(file)
-	return err == nil
-}
 
 func initApp() {
 	os.MkdirAll(defaultIndexDir(), 0755)
