@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -20,10 +19,13 @@ import (
 	"github.com/rubiojr/rapi"
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
+	"github.com/rubiojr/rindex/blugeindex"
 	"github.com/urfave/cli/v2"
 )
 
 var repoID = ""
+
+type songVisitor = func(field string, value []byte) bool
 
 func init() {
 	cmd := &cli.Command{
@@ -40,40 +42,42 @@ func init() {
 	appCommands = append(appCommands, cmd)
 }
 
-func randomize() (string, error) {
-	query := bluge.NewMatchPhraseQuery(repoID).SetField("repository_id")
-	request := bluge.NewAllMatches(query)
+func visitSongs(query string, visitor songVisitor) error {
+	idx := blugeindex.NewBlugeIndex(indexPath, 0)
+	defer idx.Close()
 
+	reader, err := idx.OpenReader()
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	iter, err := idx.SearchWithReader(query, reader)
+	if err != nil {
+		return nil
+	}
+
+	match, err := iter.Next()
+	for err == nil && match != nil {
+		err = match.VisitStoredFields(visitor)
+		if err != nil {
+			return err
+		}
+		match, err = iter.Next()
+	}
+
+	return err
+}
+
+func randomize() (string, error) {
 	hits := []string{}
 
-	playerReader, err := bluge.OpenReader(blugeConf)
-	if err != nil {
-		return "", errNeedsIndex
-	}
-	defer playerReader.Close()
-
-	documentMatchIterator, err := playerReader.Search(context.Background(), request)
-	if err != nil {
-		return "", err
-	}
-
-	match, err := documentMatchIterator.Next()
-	for err == nil && match != nil {
-		err = match.VisitStoredFields(func(field string, value []byte) bool {
-			if field == "_id" {
-				hits = append(hits, string(value))
-			}
-			return true
-		})
-		if err != nil {
-			return "", err
+	err := visitSongs("repository_id:"+repoID, func(field string, value []byte) bool {
+		if field == "_id" {
+			hits = append(hits, string(value))
 		}
-
-		match, err = documentMatchIterator.Next()
-	}
-	if err != nil {
-		return "", err
-	}
+		return true
+	})
 
 	if len(hits) == 0 {
 		return "", errors.New("no songs found")
@@ -147,6 +151,7 @@ func randomizeSongs(repo *repository.Repository) error {
 			return err
 		}
 
+		fmt.Println()
 		err = playSong(ctx, id, repo)
 		switch err {
 		case context.Canceled:
@@ -161,39 +166,19 @@ func randomizeSongs(repo *repository.Repository) error {
 }
 
 func playSong(ctx context.Context, id string, repo *repository.Repository) error {
-	fmt.Println()
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	s.Color("fgMagenta")
 	s.Suffix = " Song found, loading..."
+	defer s.Stop()
 
-	query := bluge.NewMatchQuery(id).SetField("_id")
-	request := bluge.NewAllMatches(query)
-
-	playerReader, err := bluge.OpenReader(blugeConf)
-	if err != nil {
-		return errNeedsIndex
-	}
-	defer playerReader.Close()
-	documentMatchIterator, err := playerReader.Search(context.Background(), request)
-	if err != nil {
-		log.Fatalf("error executing search: %v", err)
-	}
-
-	var blobBytes []byte
-	match, err := documentMatchIterator.Next()
-	if err != nil {
-		return err
-	}
-
-	if match == nil {
-		return fmt.Errorf("no MP3 file found with ID %s", id)
-	}
-
-	meta := map[string]string{}
+	found := false
 	var fname string
-	err = match.VisitStoredFields(func(field string, value []byte) bool {
+	meta := map[string]string{}
+	var blobBytes []byte
+	err := visitSongs("_id:"+id, func(field string, value []byte) bool {
+		found = true
 		if field == "blobs" {
-			blobBytes, err = fetchBlobs(repo, value)
+			blobBytes, _ = fetchBlobs(repo, value)
 			return true
 		}
 		if field == "filename" {
@@ -208,12 +193,16 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 	if err != nil {
 		return err
 	}
+
+	if !found {
+		return fmt.Errorf("no MP3 file found with ID %s", id)
+	}
+
 	if blobBytes == nil {
-		return fmt.Errorf("MP3 '%s' not found in the repository", fname)
+		return fmt.Errorf("error fetching song %s content", id)
 	}
 
 	s.Stop()
-	fmt.Println()
 
 	kind, err := filetype.Match(blobBytes)
 	if err != nil {
