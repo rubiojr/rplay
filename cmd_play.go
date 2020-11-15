@@ -173,7 +173,7 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 
 	found := false
 	var fname string
-	meta := map[string]string{}
+	meta := map[string][]byte{}
 	var blobBytes []byte
 	err := visitSongs("_id:"+id, func(field string, value []byte) bool {
 		found = true
@@ -181,12 +181,8 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 			blobBytes, _ = fetchBlobs(repo, value)
 			return true
 		}
-		if field == "filename" {
-			fname = string(value)
-			return true
-		}
 		if field != "repository_id" && field != "repository_location" && field != "_id" && field != "mod_time" {
-			meta[field] = string(value)
+			meta[field] = value
 		}
 		return true
 	})
@@ -213,7 +209,7 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 	}
 
 	for k, v := range meta {
-		printRow(k, v, headerColor)
+		printMetadata(k, v, headerColor)
 	}
 
 	return play(ctx, blobBytes)

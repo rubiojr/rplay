@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/rubiojr/rindex/blugeindex"
 	"github.com/urfave/cli/v2"
@@ -56,18 +55,10 @@ func doSearch(c *cli.Context) error {
 	match, err := documentMatchIterator.Next()
 	for err == nil && match != nil {
 		err = match.VisitStoredFields(func(field string, value []byte) bool {
-			f := strings.Title(field)
-			if field == "_id" {
-				f = "ID"
-			}
 			if filterField(field) && !verbose {
 				return true
 			}
-			v := string(value)
-			if v == "" {
-				v = "unknown"
-			}
-			printRow(f, v, headerColor)
+			printMetadata(field, value, headerColor)
 			return true
 		})
 		if err != nil {
