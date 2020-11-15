@@ -15,7 +15,7 @@ require (
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/h2non/filetype v1.1.0
 	github.com/hajimehoshi/go-mp3 v0.3.1
-	github.com/hajimehoshi/oto v0.6.6
+	github.com/hajimehoshi/oto v0.6.7
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/muesli/go-app-paths v0.2.1
 	github.com/muesli/reflow v0.2.1-0.20201103142440-d06e0479f1e5
