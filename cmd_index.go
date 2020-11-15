@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/blugelabs/bluge"
@@ -85,11 +84,11 @@ func (i *MP3Indexer) ShouldIndex(fileID string, bindex *blugeindex.BlugeIndex, n
 		year = id3Info.Year()
 	}
 	doc := bluge.NewDocument(fileID).
-		AddField(bluge.NewTextField("artist", artist).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("title", title).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("album", album).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("genre", genre).StoreValue().HighlightMatches()).
-		AddField(bluge.NewTextField("year", strconv.Itoa(year)).StoreValue().HighlightMatches())
+		AddField(bluge.NewTextField("artist", artist).StoreValue()).
+		AddField(bluge.NewTextField("title", title).StoreValue()).
+		AddField(bluge.NewTextField("album", album).StoreValue()).
+		AddField(bluge.NewTextField("genre", genre).StoreValue()).
+		AddField(bluge.NewNumericField("year", float64(year)).StoreValue())
 	return doc, true
 }
 
