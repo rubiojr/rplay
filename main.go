@@ -39,7 +39,7 @@ func main() {
 	app := &cli.App{
 		Name:     "rplay",
 		Commands: []*cli.Command{},
-		Version:  "v0.3.0",
+		Version:  "v0.3.1",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "repo",
