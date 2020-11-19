@@ -43,15 +43,6 @@ func doSearch(c *cli.Context) error {
 		return err
 	}
 
-	filterField := func(name string) bool {
-		switch name {
-		case "_id", "album", "genre", "year", "filename", "title", "artist":
-			return false
-		default:
-			return true
-		}
-	}
-
 	match, err := documentMatchIterator.Next()
 	for err == nil && match != nil {
 		err = match.VisitStoredFields(func(field string, value []byte) bool {

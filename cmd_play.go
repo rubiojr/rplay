@@ -181,7 +181,7 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 			blobBytes, _ = fetchBlobs(repo, value)
 			return true
 		}
-		if field != "repository_id" && field != "repository_location" && field != "_id" && field != "mod_time" {
+		if !filterField(field) {
 			meta[field] = value
 		}
 		return true
