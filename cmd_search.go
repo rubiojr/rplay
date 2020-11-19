@@ -38,7 +38,7 @@ func doSearch(c *cli.Context) error {
 		return err
 	}
 
-	documentMatchIterator, err := idx.SearchWithReader(q, reader)
+	documentMatchIterator, err := idx.SearchWithReaderAndQuery(q, reader)
 	if err != nil {
 		return err
 	}

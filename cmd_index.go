@@ -42,15 +42,18 @@ func init() {
 
 func indexRepo(cli *cli.Context) error {
 	progress := make(chan rindex.IndexStats, 10)
-	idxOpts := &rindex.IndexOptions{
-		Filter:         "*.mp3",
-		IndexPath:      cli.String("index-path"),
-		AppendFileMeta: true,
-		Indexer:        &MP3Indexer{},
+	idxOpts := rindex.IndexOptions{
+		Filter:          "*.mp3",
+		AppendFileMeta:  true,
+		DocumentBuilder: MP3Indexer{},
 	}
 	go progressMonitor(cli.Bool("log-errors"), progress)
 
-	stats, err := rindex.Index(idxOpts, progress)
+	idx, err := rindex.New(indexPath)
+	if err != nil {
+		return err
+	}
+	stats, err := idx.Index(context.Background(), idxOpts, progress)
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +66,7 @@ func indexRepo(cli *cli.Context) error {
 	return nil
 }
 
-func (i *MP3Indexer) ShouldIndex(fileID string, bindex *blugeindex.BlugeIndex, node *restic.Node, repo *repository.Repository) (*bluge.Document, bool) {
+func (i MP3Indexer) ShouldIndex(fileID string, bindex blugeindex.BlugeIndex, node *restic.Node, repo *repository.Repository) (*bluge.Document, bool) {
 	buf, err := repo.LoadBlob(context.Background(), restic.DataBlob, node.Content[0], nil)
 	var id3Info tag.Metadata
 	if err == nil {
@@ -104,6 +107,7 @@ func progressMonitor(logErrors bool, progress chan rindex.IndexStats) {
 				if len(p.Errors) > 0 {
 					e := p.Errors[len(p.Errors)-1].Error()
 					if e != lastError {
+						panic(e)
 						fmt.Println("\n", e)
 						lastError = e
 					}

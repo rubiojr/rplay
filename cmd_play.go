@@ -52,7 +52,7 @@ func visitSongs(query string, visitor songVisitor) error {
 	}
 	defer reader.Close()
 
-	iter, err := idx.SearchWithReader(query, reader)
+	iter, err := idx.SearchWithReaderAndQuery(query, reader)
 	if err != nil {
 		return nil
 	}
