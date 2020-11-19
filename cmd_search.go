@@ -43,6 +43,7 @@ func doSearch(c *cli.Context) error {
 		return err
 	}
 
+	count := 0
 	match, err := documentMatchIterator.Next()
 	for err == nil && match != nil {
 		err = match.VisitStoredFields(func(field string, value []byte) bool {
@@ -57,8 +58,11 @@ func doSearch(c *cli.Context) error {
 		}
 
 		fmt.Println()
+		count++
 		match, err = documentMatchIterator.Next()
 	}
+
+	fmt.Printf("Results: %d\n", count)
 
 	return err
 }
