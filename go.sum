@@ -346,8 +346,10 @@ github.com/rubiojr/rapi v0.0.0-20201105183828-9566648c5c9b h1:WFAHOF6GE9oR8qsH/k
 github.com/rubiojr/rapi v0.0.0-20201105183828-9566648c5c9b/go.mod h1:1NAgbvCOoKC04OYDRn7SvK3kqTd44K/Qox1cz4uvr0A=
 github.com/rubiojr/rapi v0.0.0-20201111125412-4758de24b28e h1:LAu8UmuivlJjF9dCjKBHsSPuk+s9HIPNC3nvELbuyl4=
 github.com/rubiojr/rapi v0.0.0-20201111125412-4758de24b28e/go.mod h1:ucTouT/4j6WpSQJUBMfIhds5vvTx8iOi6CGdZhunvq8=
-github.com/rubiojr/rindex v0.0.0-20201119152600-5506a50a9ff8 h1:pkYfmdun0JTBQuyt68SV1ohA35QqQ+q7XH9Im7krPm0=
-github.com/rubiojr/rindex v0.0.0-20201119152600-5506a50a9ff8/go.mod h1:GFY+inrlhmwjmNapGu96g/mCMLyGTAFo/MatJ7t4ftA=
+github.com/rubiojr/rindex v0.0.0-20201122151833-6df3dbba0309 h1:zrWAb1xoSuVYV+vEgFwOZg1lUBAUh70CAWVNsZn7K1s=
+github.com/rubiojr/rindex v0.0.0-20201122151833-6df3dbba0309/go.mod h1:GFY+inrlhmwjmNapGu96g/mCMLyGTAFo/MatJ7t4ftA=
+github.com/rubiojr/rindex v0.0.0-20201122153635-6c074a9293e2 h1:w+V8xmHqD8hiteM9Q1gCZca48w0SKn6IsybAY0YlbX4=
+github.com/rubiojr/rindex v0.0.0-20201122153635-6c074a9293e2/go.mod h1:GFY+inrlhmwjmNapGu96g/mCMLyGTAFo/MatJ7t4ftA=
 github.com/russross/blackfriday v1.5.2 h1:HyvC0ARfnZBqnXwABFeSZHpKvJHJJfPz81GNueLj0oo=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/russross/blackfriday/v2 v2.0.1 h1:lPqVAte+HuHNfhJ/0LC98ESWRz8afy9tM/0RK8m9o+Q=

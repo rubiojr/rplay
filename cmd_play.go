@@ -19,13 +19,13 @@ import (
 	"github.com/rubiojr/rapi"
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
-	"github.com/rubiojr/rindex/blugeindex"
+	"github.com/rubiojr/rindex"
 	"github.com/urfave/cli/v2"
 )
 
 var repoID = ""
 
-type songVisitor = func(field string, value []byte) bool
+var idx rindex.Indexer
 
 func init() {
 	cmd := &cli.Command{
@@ -42,44 +42,18 @@ func init() {
 	appCommands = append(appCommands, cmd)
 }
 
-func visitSongs(query string, visitor songVisitor) error {
-	idx := blugeindex.NewBlugeIndex(indexPath, 0)
-	defer idx.Close()
-
-	reader, err := idx.OpenReader()
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-
-	iter, err := idx.SearchWithReaderAndQuery(query, reader)
-	if err != nil {
-		return nil
-	}
-
-	match, err := iter.Next()
-	for err == nil && match != nil {
-		err = match.VisitStoredFields(visitor)
-		if err != nil {
-			return err
-		}
-		match, err = iter.Next()
-	}
-
-	return err
-}
-
 func randomize() (string, error) {
+	var err error
 	hits := []string{}
 
-	err := visitSongs("repository_id:"+repoID, func(field string, value []byte) bool {
+	count, err := idx.Search("repository_id:"+repoID, func(field string, value []byte) bool {
 		if field == "_id" {
 			hits = append(hits, string(value))
 		}
 		return true
-	})
+	}, nil)
 
-	if len(hits) == 0 {
+	if count == 0 {
 		return "", errors.New("no songs found")
 	}
 
@@ -98,6 +72,11 @@ func playCmd(c *cli.Context) error {
 		return errNeedsIndex
 	}
 	playerReader.Close()
+
+	idx, err = rindex.New(indexPath)
+	if err != nil {
+		return err
+	}
 
 	repo, err := rapi.OpenRepository(globalOptions)
 	if err != nil {
@@ -175,7 +154,7 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 	var fname string
 	meta := map[string][]byte{}
 	var blobBytes []byte
-	err := visitSongs("_id:"+id, func(field string, value []byte) bool {
+	_, err := idx.Search("_id:"+id, func(field string, value []byte) bool {
 		found = true
 		if field == "blobs" {
 			blobBytes, _ = fetchBlobs(repo, value)
@@ -185,7 +164,7 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 			meta[field] = value
 		}
 		return true
-	})
+	}, nil)
 	if err != nil {
 		return err
 	}
