@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/hajimehoshi/oto"
+	"github.com/jfreymuth/oggvorbis"
 
 	"github.com/hajimehoshi/go-mp3"
 )
@@ -29,15 +31,13 @@ func NewReader(ctx context.Context, r io.Reader) io.Reader {
 	}
 }
 
-func play(ctx context.Context, b []byte) error {
-	f := bytes.NewReader(b)
-
-	d, err := mp3.NewDecoder(f)
+func play(ctx context.Context, t string, b []byte) error {
+	rate, d, err := readerFromAudioType(t, b)
 	if err != nil {
 		return err
 	}
 
-	c, err := oto.NewContext(d.SampleRate(), 2, 2, 8192)
+	c, err := oto.NewContext(rate, 2, 2, 8192)
 	if err != nil {
 		return err
 	}
@@ -48,4 +48,25 @@ func play(ctx context.Context, b []byte) error {
 
 	_, err = io.Copy(player, NewReader(ctx, d))
 	return err
+}
+
+func readerFromAudioType(t string, b []byte) (int, io.Reader, error) {
+	f := bytes.NewReader(b)
+
+	switch t {
+	case "ogg":
+		d, err := oggvorbis.NewReader(f)
+		if err != nil {
+			return 0, nil, err
+		}
+		return d.SampleRate(), NewReaderFromFloat32Reader(d), nil
+	case "mp3":
+		d, err := mp3.NewDecoder(f)
+		if err != nil {
+			return 0, nil, err
+		}
+		return d.SampleRate(), d, nil
+	default:
+		return 0, nil, fmt.Errorf("unsupported audio type %s", t)
+	}
 }

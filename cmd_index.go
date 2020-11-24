@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/blugelabs/bluge"
@@ -22,7 +23,11 @@ var tStart = time.Now()
 
 const statusStrLen = 30
 
-type MP3Indexer struct{}
+var audioRegexp *regexp.Regexp
+
+type AudioFileMatcher struct{}
+
+type MP3DocumentBuilder struct{}
 
 func init() {
 	cmd := &cli.Command{
@@ -40,12 +45,23 @@ func init() {
 	appCommands = append(appCommands, cmd)
 }
 
+func (m *AudioFileMatcher) ShouldIndex(path string) bool {
+	return audioRegexp.Match([]byte(path))
+}
+
 func indexRepo(cli *cli.Context) error {
+	var err error
+
+	audioRegexp, err = regexp.Compile("\\.(flac|ogg|mp3)$")
+	if err != nil {
+		return err
+	}
+
 	progress := make(chan rindex.IndexStats, 10)
 	idxOpts := rindex.IndexOptions{
-		Filter:          "*.mp3",
+		FileMatcher:     &AudioFileMatcher{},
 		AppendFileMeta:  true,
-		DocumentBuilder: MP3Indexer{},
+		DocumentBuilder: &MP3DocumentBuilder{},
 	}
 	go progressMonitor(cli.Bool("log-errors"), progress)
 
@@ -66,7 +82,7 @@ func indexRepo(cli *cli.Context) error {
 	return nil
 }
 
-func (i MP3Indexer) ShouldIndex(fileID string, bindex blugeindex.BlugeIndex, node *restic.Node, repo *repository.Repository) (*bluge.Document, bool) {
+func (i MP3DocumentBuilder) BuildDocument(fileID string, bindex blugeindex.BlugeIndex, node *restic.Node, repo *repository.Repository) *bluge.Document {
 	buf, err := repo.LoadBlob(context.Background(), restic.DataBlob, node.Content[0], nil)
 	var id3Info tag.Metadata
 	if err == nil {
@@ -92,7 +108,7 @@ func (i MP3Indexer) ShouldIndex(fileID string, bindex blugeindex.BlugeIndex, nod
 		AddField(bluge.NewTextField("album", album).StoreValue()).
 		AddField(bluge.NewTextField("genre", genre).StoreValue()).
 		AddField(bluge.NewNumericField("year", float64(year)).StoreValue())
-	return doc, true
+	return doc
 }
 
 func progressMonitor(logErrors bool, progress chan rindex.IndexStats) {
@@ -126,7 +142,7 @@ func progressMonitor(logErrors bool, progress chan rindex.IndexStats) {
 				p.AlreadyIndexed,
 				len(p.Errors),
 				rate,
-				p.ScannedNodes,
+				p.ScannedFiles,
 			)
 		default:
 			time.Sleep(100 * time.Millisecond)

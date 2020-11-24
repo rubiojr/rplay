@@ -16,6 +16,7 @@ require (
 	github.com/h2non/filetype v1.1.0
 	github.com/hajimehoshi/go-mp3 v0.3.1
 	github.com/hajimehoshi/oto v0.6.7
+	github.com/jfreymuth/oggvorbis v1.0.1
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/muesli/go-app-paths v0.2.1
 	github.com/muesli/reflow v0.2.1-0.20201103142440-d06e0479f1e5
@@ -23,7 +24,7 @@ require (
 	github.com/philhofer/fwd v1.1.0 // indirect
 	github.com/pkg/xattr v0.4.2 // indirect
 	github.com/rubiojr/rapi v0.0.0-20201123145704-4dcc4cc7dde0
-	github.com/rubiojr/rindex v0.0.0-20201123192221-6974ac6ff8cc
+	github.com/rubiojr/rindex v0.0.0-20201123210602-805588eb290e
 	github.com/tinylib/msgp v1.1.3 // indirect
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/willf/bitset v1.1.11 // indirect

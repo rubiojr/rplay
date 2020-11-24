@@ -15,7 +15,6 @@ import (
 	"github.com/blugelabs/bluge"
 	"github.com/briandowns/spinner"
 	"github.com/h2non/filetype"
-	"github.com/muesli/reflow/truncate"
 	"github.com/rubiojr/rapi"
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
@@ -151,7 +150,6 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 	defer s.Stop()
 
 	found := false
-	var fname string
 	meta := map[string][]byte{}
 	var blobBytes []byte
 	_, err := idx.Search("_id:"+id, func(field string, value []byte) bool {
@@ -183,15 +181,19 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 	if err != nil {
 		return err
 	}
-	if kind.MIME.Value != "audio/mpeg" {
-		return fmt.Errorf("damaged song '%s' found", truncate.StringWithTail(fname, 40, "..."))
-	}
 
 	for k, v := range meta {
 		printMetadata(k, v, headerColor)
 	}
 
-	return play(ctx, blobBytes)
+	switch kind.MIME.Value {
+	case "audio/mpeg":
+		return play(ctx, "mp3", blobBytes)
+	case "audio/ogg":
+		return play(ctx, "ogg", blobBytes)
+	default:
+		return fmt.Errorf("Mime type '%s' not supported", kind.MIME.Value)
+	}
 }
 
 func fetchBlobs(repo *repository.Repository, value []byte) ([]byte, error) {
