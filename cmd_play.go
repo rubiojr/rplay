@@ -186,13 +186,17 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 		printMetadata(k, v, headerColor)
 	}
 
+	if kind.MIME.Value == "" {
+		return fmt.Errorf("mime type not found. damaged file?")
+	}
+
 	switch kind.MIME.Value {
 	case "audio/mpeg":
 		return play(ctx, "mp3", blobBytes)
 	case "audio/ogg":
 		return play(ctx, "ogg", blobBytes)
 	default:
-		return fmt.Errorf("Mime type '%s' not supported", kind.MIME.Value)
+		return fmt.Errorf("mime type '%s' not supported", kind.MIME.Value)
 	}
 }
 
