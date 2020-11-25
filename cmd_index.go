@@ -52,7 +52,7 @@ func (m *AudioFileMatcher) ShouldIndex(path string) bool {
 func indexRepo(cli *cli.Context) error {
 	var err error
 
-	audioRegexp, err = regexp.Compile("\\.(flac|ogg|mp3)$")
+	audioRegexp, err = regexp.Compile(`\.(flac|ogg|mp3)$`)
 	if err != nil {
 		return err
 	}

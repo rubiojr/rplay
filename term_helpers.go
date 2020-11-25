@@ -59,7 +59,7 @@ func printMetadata(field string, value []byte, color string) {
 		if err != nil {
 			v = "error"
 		} else {
-			v = fmt.Sprintf(t.Format("2006-1-2"))
+			v = t.Format("2006-1-2")
 		}
 	case "size":
 		t, err := bluge.DecodeNumericFloat64(value)
