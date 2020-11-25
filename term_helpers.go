@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/blugelabs/bluge"
@@ -35,18 +34,40 @@ func printRow(header, value, color string) {
 }
 
 func printMetadata(field string, value []byte, color string) {
-	f := strings.Title(field)
+	var f string
 	if field == "_id" {
 		f = "ID"
-	}
-	if field == "year" {
-		y, _ := bluge.DecodeNumericFloat64(value)
-		printRow(f, strconv.Itoa(int(y)), headerColor)
+	} else if field == "repository_id" {
+		f = "Repository ID"
 	} else {
-		v := string(value)
-		if v == "" {
-			v = "unknown"
-		}
-		printRow(f, v, headerColor)
+		f = strings.Title(strings.ReplaceAll(field, "_", " "))
 	}
+
+	var v string
+	switch field {
+	case "mtime":
+		t, err := bluge.DecodeDateTime(value)
+		if err != nil {
+			v = "error"
+		} else {
+			v = fmt.Sprintf(t.Format("2006-1-2"))
+		}
+	case "size":
+		t, err := bluge.DecodeNumericFloat64(value)
+		if err != nil {
+			v = "error"
+		} else {
+			v = fmt.Sprintf("%0.f", t)
+		}
+	case "year":
+		y, err := bluge.DecodeNumericFloat64(value)
+		if err != nil {
+			v = "error"
+		}
+		v = fmt.Sprintf("%0.f", y)
+	default:
+		v = string(value)
+	}
+
+	printRow(f, v, headerColor)
 }
