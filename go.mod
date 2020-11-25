@@ -2,8 +2,6 @@ module github.com/rubiojr/rplay
 
 go 1.15
 
-replace github.com/rubiojr/go-acoustid => /home/rubiojr/git/rubiojr/go-acoustid
-
 require (
 	cloud.google.com/go v0.71.0 // indirect
 	github.com/Azure/azure-sdk-for-go v48.1.0+incompatible // indirect
