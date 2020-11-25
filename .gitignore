@@ -2,3 +2,4 @@
 /*.bluge
 /dist
 /tmp
+/internal/acoustid/key.go

@@ -7,11 +7,12 @@ A command line MP3 player for your [Restic repository](https://restic.net).
 
 ## Features
 
-* Index available MP3 files
-* Supports ID3 tags
-* Search your MP3 collection (filename only for now, tag based search coming)
+* Index and play available audio files (flac, mp3, ogg)
+* ID3 metadata support
+* Search your music collection (filename or ID3 tag)
 * Support for indexing multiple Restic repositories
 * Random, endless playback
+* Optionally fetch missing song metadata (artist, album, etc) from Internet (see [ACOUSTICID.md](docs/ACOUSTICID.md))
 * macOS and Linux supported
 
 ## Installation
@@ -118,7 +119,6 @@ export RESTIC_PASSWORD=secret
 
 ## Roadmap
 
-* Play and search songs by ID3 tags (artist, album, genre, etc).
 * Better curses UI
 * Flag songs as hidden/unwanted
 

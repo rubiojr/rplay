@@ -23,6 +23,15 @@ var filterField = func(name string) bool {
 	}
 }
 
+var filterFieldPlay = func(name string) bool {
+	switch name {
+	case "album", "genre", "year", "filename", "title", "artist":
+		return false
+	default:
+		return true
+	}
+}
+
 func colorize(str, color string) string {
 	out := termenv.String(str)
 	p := termenv.ColorProfile()
@@ -43,7 +52,7 @@ func printMetadata(field string, value []byte, color string) {
 		f = strings.Title(strings.ReplaceAll(field, "_", " "))
 	}
 
-	var v string
+	v := ""
 	switch field {
 	case "mtime":
 		t, err := bluge.DecodeDateTime(value)
@@ -64,10 +73,14 @@ func printMetadata(field string, value []byte, color string) {
 		if err != nil {
 			v = "error"
 		}
-		v = fmt.Sprintf("%0.f", y)
+		if y != 0 {
+			v = fmt.Sprintf("%0.f", y)
+		}
 	default:
 		v = string(value)
 	}
 
-	printRow(f, v, headerColor)
+	if v != "" {
+		printRow(f, v, headerColor)
+	}
 }

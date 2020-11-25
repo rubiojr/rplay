@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -19,24 +20,49 @@ import (
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
 	"github.com/rubiojr/rindex"
+	"github.com/rubiojr/rplay/internal/acoustid"
+	"github.com/rubiojr/rplay/internal/fps"
 	"github.com/urfave/cli/v2"
 )
 
 var repoID = ""
 
 var idx rindex.Indexer
+var fetchMetadata = false
+var overrideMetadata = false
 
 func init() {
 	cmd := &cli.Command{
 		Name:   "play",
 		Usage:  "Play a song (random if no argument given)",
 		Action: playCmd,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:     "fetch-metadata",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "override-metadata",
+				Required: false,
+			},
+		},
 	}
 	appCommands = append(appCommands, cmd)
+
 	cmd = &cli.Command{
 		Name:   "random",
 		Usage:  "Play songs randomly and endlessly",
 		Action: playCmd,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:     "fetch-metadata",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "override-metadata",
+				Required: false,
+			},
+		},
 	}
 	appCommands = append(appCommands, cmd)
 }
@@ -64,6 +90,17 @@ func randomize() (string, error) {
 
 func playCmd(c *cli.Context) error {
 	initApp()
+
+	fetchMetadata = c.Bool("fetch-metadata")
+	overrideMetadata = c.Bool("override-metadata")
+	// overrideMetadata also means fetchMetadata
+	if overrideMetadata {
+		fetchMetadata = overrideMetadata
+	}
+
+	if fetchMetadata && acoustid.FindFPCALC() == "" {
+		fmt.Fprintln(os.Stderr, "\n⚠️  fpcalc not found, acousting fingerprinting won't work\n")
+	}
 
 	// Fail fast if index does not exist
 	playerReader, err := bluge.OpenReader(blugeConf)
@@ -147,18 +184,15 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	s.Color("fgMagenta")
 	s.Suffix = " Song found, loading..."
-	defer s.Stop()
 
-	found := false
 	meta := map[string][]byte{}
 	var blobBytes []byte
 	_, err := idx.Search("_id:"+id, func(field string, value []byte) bool {
-		found = true
 		if field == "blobs" {
 			blobBytes, _ = fetchBlobs(repo, value)
 			return true
 		}
-		if !filterField(field) {
+		if !filterFieldPlay(field) {
 			meta[field] = value
 		}
 		return true
@@ -167,7 +201,7 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 		return err
 	}
 
-	if !found {
+	if len(meta) == 0 {
 		return fmt.Errorf("no MP3 file found with ID %s", id)
 	}
 
@@ -175,12 +209,20 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 		return fmt.Errorf("error fetching song %s content", id)
 	}
 
-	s.Stop()
-
 	kind, err := filetype.Match(blobBytes)
 	if err != nil {
 		return err
 	}
+
+	if fetchMetadata {
+		s.Suffix = " 🌍 fetching metadata..."
+		err := fixMetadata(blobBytes, meta)
+		if err == nil {
+			s.Suffix = " 🌍 Metadata found"
+		}
+	}
+
+	s.Stop()
 
 	for k, v := range meta {
 		printMetadata(k, v, headerColor)
@@ -219,4 +261,26 @@ func fetchBlobs(repo *repository.Repository, value []byte) ([]byte, error) {
 	}
 
 	return bytes.Join(blobBytes, []byte("")), nil
+}
+
+func fixMetadata(song []byte, meta map[string][]byte) error {
+	fprinter := fps.New(filepath.Join(defaultIndexDir(), "acoustid.db"))
+	breader := bytes.NewReader(song)
+
+	fmeta, err := fprinter.Fingerprint(breader)
+	if err != nil {
+		return err
+	}
+
+	if string(meta["artist"]) == "" || overrideMetadata {
+		meta["artist"] = []byte(fmeta.Artist + " 🌍")
+	}
+	if string(meta["title"]) == "" || overrideMetadata {
+		meta["title"] = []byte(fmeta.Title + " 🌍")
+	}
+	if string(meta["album"]) == "" || overrideMetadata {
+		meta["album"] = []byte(fmeta.Album + " 🌍")
+	}
+
+	return nil
 }

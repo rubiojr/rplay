@@ -5,6 +5,9 @@ all: rplay
 rplay: clean
 	go build
 
+release:
+	./script/build
+
 clean:
 	rm -f rplay
 
