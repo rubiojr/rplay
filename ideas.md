@@ -5,8 +5,8 @@
 * Export tagged music as Artist/Album/Song.mp3
 * Export all music, tagged and untagged
 * Find untagged music
-* Find by id3 tag fields
 * Find similar songs (by content blobs), i.e. slightly modified songs (presumably updated id3 tags) will be listed
 * Curses UI
 * GTK UI
 * Systray (notification area) player
+* Fetch album cover and display it using something like https://github.com/trashhalo/imgcat
