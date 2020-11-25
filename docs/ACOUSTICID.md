@@ -25,6 +25,6 @@ rplay random --override-metadata
 
 Playing a song no will display a 🌍 alongside the metadata updated if it's been retrieved from acoustid.org:
 
-![](docs/images/acoustid-fetch.png)
+![](images/acoustid-fetch.png)
 
 The metadata fetched is stored on disk permanently, so fetching metadata from the network won't be required a second time if the song has been played before with `--fetch-metadata` or `--override-metadata` enabled.
