@@ -10,3 +10,6 @@
 * GTK UI
 * Systray (notification area) player
 * Fetch album cover and display it using something like https://github.com/trashhalo/imgcat
+* Research https://github.com/YouROK/SRadio, using GOTK3 y libmpv
+* Audio visualizer https://github.com/noriah/catnip
+* Research https://github.com/diamondburned/aqours
