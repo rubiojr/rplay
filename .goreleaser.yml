@@ -1,7 +1,7 @@
 before:
   hooks:
-    # you may remove this if you don't use vgo
     - go mod tidy
+    - ./script/add-acoustid-key
 builds:
 -
   env:
@@ -10,6 +10,8 @@ builds:
     - linux
   goarch:
     - amd64
+  hooks:
+    post: git checkout internal/acoustid/key.go
 archives:
 -
   format: gz

@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+if [ -z "$ACOUSTID_API_KEY" ]; then
+  echo "ACOUSTID_API_KEY environment variable required" >&2
+  exit 1
+fi
+
+echo \
+  "package acoustid\nconst ACOUSTID_API_KEY = \"$ACOUSTID_API_KEY\"" \
+  > internal/acoustid/key.go
