@@ -75,7 +75,7 @@ func indexRepo(cli *cli.Context) error {
 	}
 	fmt.Printf(
 		"\n💥 %d indexed, %d already present. Took %d seconds.\n",
-		stats.IndexedNodes,
+		stats.IndexedFiles,
 		stats.AlreadyIndexed,
 		int(time.Since(tStart).Seconds()),
 	)
@@ -136,9 +136,9 @@ func progressMonitor(logErrors bool, progress chan rindex.IndexStats) {
 			ls := truncate.StringWithTail(lm, statusStrLen, "...")
 			rate := float64(p.ScannedNodes*1000000000) / float64(time.Since(tStart))
 			s.Suffix = fmt.Sprintf(
-				" %s 🎯 %d new, %d skipped, %d errors, %.0f f/s, %d files scanned",
+				" %s 🎯 %d new, %d skipped, %d err, %.0f f/s, %d scanned",
 				padding.String(ls, statusStrLen),
-				p.IndexedNodes,
+				p.IndexedFiles,
 				p.AlreadyIndexed,
 				len(p.Errors),
 				rate,
