@@ -109,7 +109,7 @@ func playCmd(c *cli.Context) error {
 	}
 	playerReader.Close()
 
-	idx, err = rindex.New(indexPath)
+	idx, err = rindex.New(indexPath, globalOptions.Repo, globalOptions.Password)
 	if err != nil {
 		return err
 	}

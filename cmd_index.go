@@ -15,7 +15,6 @@ import (
 	"github.com/rubiojr/rapi/repository"
 	"github.com/rubiojr/rapi/restic"
 	"github.com/rubiojr/rindex"
-	"github.com/rubiojr/rindex/blugeindex"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,7 +24,7 @@ const statusStrLen = 30
 
 var audioRegexp *regexp.Regexp
 
-type AudioFileMatcher struct{}
+type AudioFilter struct{}
 
 type MP3DocumentBuilder struct{}
 
@@ -40,12 +39,17 @@ func init() {
 				Usage:    "Log errors",
 				Required: false,
 			},
+			&cli.BoolFlag{
+				Name:     "reindex",
+				Usage:    "Re-index files",
+				Required: false,
+			},
 		},
 	}
 	appCommands = append(appCommands, cmd)
 }
 
-func (m *AudioFileMatcher) ShouldIndex(path string) bool {
+func (m *AudioFilter) ShouldIndex(path string) bool {
 	return audioRegexp.Match([]byte(path))
 }
 
@@ -59,13 +63,17 @@ func indexRepo(cli *cli.Context) error {
 
 	progress := make(chan rindex.IndexStats, 10)
 	idxOpts := rindex.IndexOptions{
-		FileMatcher:     &AudioFileMatcher{},
+		Filter:          &AudioFilter{},
 		AppendFileMeta:  true,
 		DocumentBuilder: &MP3DocumentBuilder{},
 	}
+	if cli.Bool("reindex") {
+		idxOpts.Reindex = true
+		fmt.Println("Re-indexing all snapshots and files")
+	}
 	go progressMonitor(cli.Bool("log-errors"), progress)
 
-	idx, err := rindex.New(indexPath)
+	idx, err := rindex.New(indexPath, globalOptions.Repo, globalOptions.Password)
 	if err != nil {
 		return err
 	}
@@ -82,7 +90,7 @@ func indexRepo(cli *cli.Context) error {
 	return nil
 }
 
-func (i MP3DocumentBuilder) BuildDocument(fileID string, bindex blugeindex.BlugeIndex, node *restic.Node, repo *repository.Repository) *bluge.Document {
+func (i MP3DocumentBuilder) BuildDocument(fileID string, node *restic.Node, repo *repository.Repository) *bluge.Document {
 	buf, err := repo.LoadBlob(context.Background(), restic.DataBlob, node.Content[0], nil)
 	var id3Info tag.Metadata
 	if err == nil {

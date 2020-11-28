@@ -29,7 +29,7 @@ func doSearch(c *cli.Context) error {
 	q := c.Args().Get(0)
 	verbose := c.Bool("verbose")
 
-	idx, err := rindex.New(indexPath)
+	idx, err := rindex.New(indexPath, globalOptions.Repo, globalOptions.Password)
 	if err != nil {
 		return err
 	}
