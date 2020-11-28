@@ -250,7 +250,7 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 	}
 
 	song.Seek(0, 0)
-	return playReader(ctx, kind.MIME.Value, song)
+	return play(ctx, kind.MIME.Value, song)
 }
 
 func fixMetadata(id, song string, meta map[string][]byte) error {
