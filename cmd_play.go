@@ -38,12 +38,14 @@ func init() {
 		Action: playCmd,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:     "fetch-metadata",
-				Required: false,
+				Name:        "fetch-metadata",
+				Required:    false,
+				Destination: &fetchMetadata,
 			},
 			&cli.BoolFlag{
-				Name:     "override-metadata",
-				Required: false,
+				Name:        "override-metadata",
+				Required:    false,
+				Destination: &overrideMetadata,
 			},
 		},
 	}
@@ -55,12 +57,14 @@ func init() {
 		Action: playCmd,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:     "fetch-metadata",
-				Required: false,
+				Name:        "fetch-metadata",
+				Required:    false,
+				Destination: &fetchMetadata,
 			},
 			&cli.BoolFlag{
-				Name:     "override-metadata",
-				Required: false,
+				Name:        "override-metadata",
+				Required:    false,
+				Destination: &overrideMetadata,
 			},
 		},
 	}
@@ -91,8 +95,6 @@ func randomize() (string, error) {
 func playCmd(c *cli.Context) error {
 	initApp()
 
-	fetchMetadata = c.Bool("fetch-metadata")
-	overrideMetadata = c.Bool("override-metadata")
 	// overrideMetadata also means fetchMetadata
 	if overrideMetadata {
 		fetchMetadata = overrideMetadata
