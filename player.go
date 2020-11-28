@@ -36,7 +36,7 @@ func play(ctx context.Context, t string, reader io.Reader) error {
 		return err
 	}
 
-	c, err := oto.NewContext(rate, 2, 2, 8192)
+	c, err := oto.NewContext(rate, 2, 2, 32768)
 	if err != nil {
 		return err
 	}

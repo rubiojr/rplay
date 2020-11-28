@@ -225,12 +225,6 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 		return fmt.Errorf("mime type not found. damaged file?")
 	}
 
-	song, err := os.Open(tmpFileName)
-	if err != nil {
-		return err
-	}
-	defer song.Close()
-
 	if fetchMetadata {
 		s.Suffix = " 🌍 fetching metadata..."
 		err := fixMetadata(id, tmpFileName, meta)
@@ -249,7 +243,11 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 		printMetadata(k, meta[k], headerColor)
 	}
 
-	song.Seek(0, 0)
+	song, err := os.Open(tmpFileName)
+	if err != nil {
+		return err
+	}
+	defer song.Close()
 	return play(ctx, kind.MIME.Value, song)
 }
 
