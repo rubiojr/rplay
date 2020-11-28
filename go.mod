@@ -27,7 +27,7 @@ require (
 	github.com/philhofer/fwd v1.1.0 // indirect
 	github.com/pkg/xattr v0.4.2 // indirect
 	github.com/rubiojr/rapi v0.0.0-20201123145704-4dcc4cc7dde0
-	github.com/rubiojr/rindex v0.0.0-20201128140630-f35e614235d4
+	github.com/rubiojr/rindex v0.0.0-20201128155201-37ee8d28d522
 	github.com/tinylib/msgp v1.1.3 // indirect
 	github.com/urfave/cli/v2 v2.2.0
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect

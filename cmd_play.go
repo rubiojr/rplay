@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -16,9 +14,9 @@ import (
 	"github.com/blugelabs/bluge"
 	"github.com/briandowns/spinner"
 	"github.com/h2non/filetype"
+	"github.com/muesli/reflow/truncate"
 	"github.com/rubiojr/rapi"
 	"github.com/rubiojr/rapi/repository"
-	"github.com/rubiojr/rapi/restic"
 	"github.com/rubiojr/rindex"
 	"github.com/rubiojr/rplay/internal/acoustid"
 	"github.com/rubiojr/rplay/internal/fps"
@@ -30,6 +28,7 @@ var repoID = ""
 var idx rindex.Indexer
 var fetchMetadata = false
 var overrideMetadata = false
+var tmpFileName string
 
 func init() {
 	cmd := &cli.Command{
@@ -94,6 +93,7 @@ func randomize() (string, error) {
 
 func playCmd(c *cli.Context) error {
 	initApp()
+	tmpFileName = filepath.Join(defaultCacheDir(), fmt.Sprintf("song-%d", time.Now().UnixNano()))
 
 	// overrideMetadata also means fetchMetadata
 	if overrideMetadata {
@@ -121,11 +121,6 @@ func playCmd(c *cli.Context) error {
 		return err
 	}
 
-	err = repo.LoadIndex(context.Background())
-	if err != nil {
-		return err
-	}
-
 	repoID = repo.Config().ID
 
 	id := c.Args().Get(0)
@@ -149,12 +144,13 @@ func randomizeSongs(repo *repository.Repository) error {
 			s := <-signal_chan
 			switch s {
 			case syscall.SIGINT:
+				cancel()
 				now := time.Now()
 				if time.Since(lastCancel) < 2*time.Second {
+					os.Remove(tmpFileName)
 					os.Exit(0)
 				}
 				lastCancel = now
-				cancel()
 			default:
 			}
 		}
@@ -177,7 +173,7 @@ func randomizeSongs(repo *repository.Repository) error {
 		case nil:
 			continue
 		default:
-			fmt.Printf("🛑 %v.", err)
+			fmt.Printf("\n\n🛑 %v\n", err)
 		}
 	}
 }
@@ -185,13 +181,13 @@ func randomizeSongs(repo *repository.Repository) error {
 func playSong(ctx context.Context, id string, repo *repository.Repository) error {
 	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
 	s.Color("fgMagenta")
-	s.Suffix = " Song found, loading..."
+	s.Suffix = " Song found, buffering..."
 
+	var ssize float64
 	meta := map[string][]byte{}
-	var blobBytes []byte
 	_, err := idx.Search("_id:"+id, func(field string, value []byte) bool {
-		if field == "blobs" {
-			blobBytes, _ = fetchBlobs(repo, value)
+		if field == "size" {
+			ssize, _ = bluge.DecodeNumericFloat64(value)
 			return true
 		}
 		if !filterFieldPlay(field) {
@@ -199,90 +195,83 @@ func playSong(ctx context.Context, id string, repo *repository.Repository) error
 		}
 		return true
 	}, nil)
+
+	title := string(meta["title"])
+	if title != "" {
+		s.Suffix = fmt.Sprintf(" Song found, buffering '%s'...", truncate.StringWithTail(title, 20, ""))
+	}
+
+	// Limit to 30MiB songs for now
+	if ssize > 31457280 {
+		return errors.New("song too big")
+	}
+
+	tmpFile, err := os.Create(tmpFileName)
+	if err != nil {
+		return err
+	}
+	defer tmpFile.Close()
+
+	err = idx.Fetch(ctx, id, tmpFile)
 	if err != nil {
 		return err
 	}
 
-	if len(meta) == 0 {
-		return fmt.Errorf("no MP3 file found with ID %s", id)
-	}
-
-	if blobBytes == nil {
-		return fmt.Errorf("error fetching song %s content", id)
-	}
-
-	kind, err := filetype.Match(blobBytes)
+	kind, err := filetype.MatchFile(tmpFileName)
 	if err != nil {
 		return err
 	}
+	if kind.MIME.Value == "" {
+		return fmt.Errorf("mime type not found. damaged file?")
+	}
+
+	song, err := os.Open(tmpFileName)
+	if err != nil {
+		return err
+	}
+	defer song.Close()
 
 	if fetchMetadata {
 		s.Suffix = " 🌍 fetching metadata..."
-		err := fixMetadata(blobBytes, meta)
-		if err == nil {
-			s.Suffix = " 🌍 Metadata found"
+		err := fixMetadata(id, tmpFileName, meta)
+		if err != nil {
+			meta["metadata source"] = []byte("🤷")
 		}
 	}
 
 	s.Stop()
 
-	for k, v := range meta {
-		printMetadata(k, v, headerColor)
+	// Sort metadata
+	keys := []string{
+		"title", "artist", "album", "genre", "year", "metadata source", "filename", "_id",
+	}
+	for _, k := range keys {
+		printMetadata(k, meta[k], headerColor)
 	}
 
-	if kind.MIME.Value == "" {
-		return fmt.Errorf("mime type not found. damaged file?")
-	}
-
-	switch kind.MIME.Value {
-	case "audio/mpeg":
-		return play(ctx, "mp3", blobBytes)
-	case "audio/ogg":
-		return play(ctx, "ogg", blobBytes)
-	default:
-		return fmt.Errorf("mime type '%s' not supported", kind.MIME.Value)
-	}
+	song.Seek(0, 0)
+	return playReader(ctx, kind.MIME.Value, song)
 }
 
-func fetchBlobs(repo *repository.Repository, value []byte) ([]byte, error) {
-	var blobs []string
-
-	err := json.Unmarshal(value, &blobs)
-	if err != nil {
-		return nil, err
-	}
-
-	blobBytes := [][]byte{}
-	for _, id := range blobs {
-		rid, _ := restic.ParseID(id)
-		bytes, err := repo.LoadBlob(context.Background(), restic.DataBlob, rid, nil)
-		if err != nil {
-			return nil, err
-		}
-		blobBytes = append(blobBytes, bytes)
-	}
-
-	return bytes.Join(blobBytes, []byte("")), nil
-}
-
-func fixMetadata(song []byte, meta map[string][]byte) error {
+func fixMetadata(id, song string, meta map[string][]byte) error {
 	fprinter := fps.New(filepath.Join(defaultIndexDir(), "acoustid.db"))
-	breader := bytes.NewReader(song)
 
-	fmeta, err := fprinter.Fingerprint(breader)
+	fmeta, err := fprinter.Fingerprint(id, song)
 	if err != nil {
 		return err
 	}
 
 	if string(meta["artist"]) == "" || overrideMetadata {
-		meta["artist"] = []byte(fmeta.Artist + " 🌍")
+		meta["artist"] = []byte(fmeta.Artist)
 	}
 	if string(meta["title"]) == "" || overrideMetadata {
-		meta["title"] = []byte(fmeta.Title + " 🌍")
+		meta["title"] = []byte(fmeta.Title)
 	}
 	if string(meta["album"]) == "" || overrideMetadata {
-		meta["album"] = []byte(fmeta.Album + " 🌍")
+		meta["album"] = []byte(fmeta.Album)
 	}
+
+	meta["metadata source"] = []byte(fmt.Sprintf("%t", fmeta.Cached))
 
 	return nil
 }

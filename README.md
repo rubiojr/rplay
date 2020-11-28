@@ -31,16 +31,15 @@ Or clone the repository and run `go build`.
 
 ### ⚠️ A word of caution
 
-RPlay does not encrypt the index created, meaning that the following information from your Restic repository will be available to those with access to the index:
+RPlay does not encrypt the index created (locally, where rplay runs), meaning that the following information from your Restic repository will be available to those with access to the index:
 
 * Audio file names and ID3 metadata
+* Audio file contents (cached locally for playback and other things)
 * Repository ID
 * Restic (packed)blob metadata (the SHA256 of the Packfile where the blob is stored, blob length, offset within the pack file)
 * Last file modification time (mtime)
 * Hostname where the file was backed up
 * Full file path when it was backed up
-
-Note that only audio files metadata is indexed (flac, mp3, ogg) and that the file raw data isn't stored/cached on disk, RPlay streams it.
 
 ### Indexing your MP3
 

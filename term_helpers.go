@@ -25,7 +25,7 @@ var filterField = func(name string) bool {
 
 var filterFieldPlay = func(name string) bool {
 	switch name {
-	case "album", "genre", "year", "filename", "title", "artist":
+	case "_id", "cached metadata", "album", "genre", "year", "filename", "title", "artist":
 		return false
 	default:
 		return true
@@ -76,6 +76,12 @@ func printMetadata(field string, value []byte, color string) {
 		if y != 0 {
 			v = fmt.Sprintf("%0.f", y)
 		}
+	case "metadata source":
+		v = "🌍"
+		if string(value) == "true" {
+			v = "💾"
+		}
+
 	default:
 		v = string(value)
 	}

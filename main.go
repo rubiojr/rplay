@@ -18,6 +18,7 @@ var indexPath = defaultIndexPath()
 
 func initApp() {
 	os.MkdirAll(defaultIndexDir(), 0755)
+	os.MkdirAll(defaultCacheDir(), 0755)
 	blugeConf = bluge.DefaultConfig(indexPath)
 }
 
@@ -28,6 +29,15 @@ func defaultIndexDir() string {
 		panic(err)
 	}
 	return dirs[0]
+}
+
+func defaultCacheDir() string {
+	scope := gap.NewScope(gap.User, "rplay")
+	dir, err := scope.CacheDir()
+	if err != nil {
+		panic(err)
+	}
+	return dir
 }
 
 func defaultIndexPath() string {
