@@ -18,7 +18,7 @@ require (
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/h2non/filetype v1.1.0
 	github.com/hajimehoshi/go-mp3 v0.3.1
-	github.com/hajimehoshi/oto v0.6.8-0.20201122151108-85c7e79c8528
+	github.com/hajimehoshi/oto v0.7.1-0.20210105125505-b2e5c7d0272c
 	github.com/jfreymuth/oggvorbis v1.0.1
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/muesli/go-app-paths v0.2.1
